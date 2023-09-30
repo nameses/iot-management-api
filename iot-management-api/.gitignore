@@ -1,0 +1,8 @@
+.vs/
+appsettings.json
+appsettings.Development.json
+obj/
+bin/
+Migrations/
+Properties/PublishProfiles/
+.config/
