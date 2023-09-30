@@ -4,6 +4,7 @@ using iot_management_api.Helper;
 using iot_management_api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.AzureAppServices;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -19,6 +20,18 @@ var connString = configuration.GetSection("ConnectionStrings")["SqlConnection"];
 
 //log services
 builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+builder.Logging.ClearProviders()
+    .AddConsole()
+    .AddDebug()
+    .AddAzureWebAppDiagnostics();
+
+
+builder.Services.Configure<AzureFileLoggerOptions>(options =>
+    {
+        options.FileName = "my-azure-diagnostics-";
+        options.FileSizeLimit = 50 * 1024;
+        options.RetainedFileCountLimit = 5;
+    });
 
 //controllers
 builder.Services.AddControllers();
@@ -93,11 +106,9 @@ var app = builder.Build();
 app.UseRouting();
 
 //swagger
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI();
 
 //serilog
 app.UseSerilogRequestLogging();

@@ -1,8 +1,13 @@
 .vs/
+.config/
 appsettings.json
 appsettings.Development.json
+appsettings.Production.json
 obj/
 bin/
 Migrations/
 Properties/PublishProfiles/
-.config/
+Properties/ServiceDependencies/
+Properties/ServiceDependencies.iotManagementAPI - Web Deploy.json
+Properties/serviceDependencies.iotManagementAPI - Web Deploy.json.user
+Properties/serviceDependencies.json
