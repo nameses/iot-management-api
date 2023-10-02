@@ -23,7 +23,7 @@ namespace iot_management_api.Controllers
         [HttpGet]
         [Authorize]
         [Route("get/{id}")]
-        //[ProducesResponseType(typeof(), 200)]
+        [ProducesResponseType(typeof(StudentModel), 200)]
         public async Task<IActionResult> GetById(int id)
         {
             var student = await _studentService.GetById(id);

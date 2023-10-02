@@ -21,6 +21,9 @@ namespace iot_management_api.Helper
                 .ForMember(dest => dest.GroupCode, opt => opt.MapFrom(src => src.Group.GroupCode));
 
             CreateMap<User, UserModel>();
+
+            CreateMap<Group, GroupModel>()
+                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.Students));
         }
     }
 }

@@ -23,7 +23,10 @@ namespace iot_management_api.Services
         }
         public async Task<Group?> GetByGroupCode(string? groupCode)
         {
-            var group = await _context.Groups.FirstOrDefaultAsync(x => x.GroupCode == groupCode);
+            var group = await _context.Groups
+                .Include(x => x.Students)
+                .Include(x => x.Schedules)
+                .FirstOrDefaultAsync(x => x.GroupCode == groupCode);
 
             if (group==null)
             {
@@ -43,7 +46,10 @@ namespace iot_management_api.Services
                 return null;
             }
 
-            var group = await _context.Groups.FirstOrDefaultAsync(x => x.Id == id);
+            var group = await _context.Groups
+                .Include(x => x.Students)
+                .Include(x => x.Schedules)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (group==null)
             {
