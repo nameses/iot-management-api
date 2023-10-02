@@ -2,6 +2,7 @@
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
 using iot_management_api.Models;
+using iot_management_api.Models.common;
 using static iot_management_api.Controllers.AuthController;
 
 namespace iot_management_api.Helper

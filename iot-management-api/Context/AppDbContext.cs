@@ -12,11 +12,18 @@ namespace iot_management_api.Context
         { }
     }
 
+    public class DateOnlyConverter : ValueConverter<DateOnly, DateTime>
+    {
+        public DateOnlyConverter() : base(
+            dateOnly => dateOnly.ToDateTime(TimeOnly.MinValue),
+            dateTime => DateOnly.FromDateTime(dateTime))
+        { }
+    }
+
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -28,6 +35,24 @@ namespace iot_management_api.Context
             builder.Entity<Room>()
                 .HasIndex(u => u.Number)
                 .IsUnique();
+
+            builder.Entity<Booking>()
+                .HasOne(b => b.Student)
+                .WithMany()
+                .HasForeignKey(b => b.StudentId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Booking>()
+                .HasOne(b => b.Schedule)
+                .WithMany()
+                .HasForeignKey(b => b.ScheduleId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Booking>()
+                .HasOne(b => b.Device)
+                .WithMany()
+                .HasForeignKey(b => b.DeviceId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder builder)
@@ -36,8 +61,12 @@ namespace iot_management_api.Context
 
             builder.Properties<TimeOnly>()
                 .HaveConversion<TimeOnlyConverter>();
+
+            builder.Properties<DateOnly>()
+                .HaveConversion<DateOnlyConverter>();
         }
 
+        public DbSet<Booking> Bookings { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<DeviceInfo> DeviceInfos { get; set; }
         public DbSet<Group> Groups { get; set; }
@@ -47,6 +76,5 @@ namespace iot_management_api.Context
         public DbSet<Student> Students { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
-
     }
 }
