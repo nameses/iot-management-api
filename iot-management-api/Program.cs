@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.AzureAppServices;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,17 +28,22 @@ builder.Logging.ClearProviders()
 
 
 builder.Services.Configure<AzureFileLoggerOptions>(options =>
-    {
-        options.FileName = "my-azure-diagnostics-";
-        options.FileSizeLimit = 50 * 1024;
-        options.RetainedFileCountLimit = 5;
-    });
+{
+    options.FileName = "my-azure-diagnostics-";
+    options.FileSizeLimit = 50 * 1024;
+    options.RetainedFileCountLimit = 5;
+});
 
 //controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 //services
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddTransient<JwtHandler>();
 builder.Services.AddTransient<JwtGenerator>();
 builder.Services.AddSingleton<JwtValidator>();
@@ -85,6 +91,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
 //CORS
 builder.Services.AddCors(options =>
 {
