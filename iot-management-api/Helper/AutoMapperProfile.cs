@@ -2,6 +2,7 @@
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
 using iot_management_api.Models;
+using iot_management_api.Models.common;
 using static iot_management_api.Controllers.AuthController;
 
 namespace iot_management_api.Helper
@@ -20,6 +21,9 @@ namespace iot_management_api.Helper
                 .ForMember(dest => dest.GroupCode, opt => opt.MapFrom(src => src.Group.GroupCode));
 
             CreateMap<User, UserModel>();
+
+            CreateMap<Group, GroupModel>()
+                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.Students));
         }
     }
 }

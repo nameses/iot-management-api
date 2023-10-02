@@ -41,6 +41,7 @@ namespace iot_management_api.Helper
                 }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
+
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
                 return userId;

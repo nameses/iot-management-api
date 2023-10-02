@@ -7,36 +7,36 @@ using Microsoft.AspNetCore.Mvc;
 namespace iot_management_api.Controllers
 {
     [ApiController]
-    [Route("api/student")]
-    public class StudentController : Controller
+    [Route("api/group")]
+    public class GroupController : Controller
     {
-        private readonly IStudentService _studentService;
+        private readonly IGroupService _groupService;
         private readonly IMapper _mapper;
-        private readonly ILogger<StudentController> _logger;
+        private readonly ILogger<GroupController> _logger;
 
-        public StudentController(IStudentService studentService, IMapper mapper, ILogger<StudentController> logger)
+        public GroupController(IGroupService groupService, IMapper mapper, ILogger<GroupController> logger)
         {
-            _studentService = studentService;
+            _groupService = groupService;
             _mapper=mapper;
             _logger=logger;
         }
         [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
         [Route("get/{id}")]
-        [ProducesResponseType(typeof(StudentModel), 200)]
+        [ProducesResponseType(typeof(GroupModel), 200)]
         public async Task<IActionResult> GetById(int id)
         {
-            var student = await _studentService.GetById(id);
+            var group = await _groupService.GetById(id);
 
-            if (student==null)
+            if (group==null)
             {
-                _logger.LogInformation($"Student with id={id} not found");
+                _logger.LogInformation($"Group with id={id} not found");
                 return NotFound();
             }
 
             return Ok(new
             {
-                Student = _mapper.Map<StudentModel>(student)
+                Student = _mapper.Map<GroupModel>(group)
             });
         }
     }

@@ -12,5 +12,6 @@ namespace iot_management_api.Entities.common
         public required string Surname { get; set; }
         public required string Email { get; set; }
         public required string Password { get; set; }
+        public TimeSpan CreatedAt { get; set; }
     }
 }
