@@ -38,7 +38,6 @@ namespace iot_management_api.Context
                 .HaveConversion<TimeOnlyConverter>();
         }
 
-        public DbSet<User> Users { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<DeviceInfo> DeviceInfos { get; set; }
         public DbSet<Group> Groups { get; set; }

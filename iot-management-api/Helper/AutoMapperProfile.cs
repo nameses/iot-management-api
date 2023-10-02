@@ -2,7 +2,7 @@
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
 using iot_management_api.Models;
-using static iot_management_api.Controllers.AuthController.RegRequest;
+using static iot_management_api.Controllers.AuthController;
 
 namespace iot_management_api.Helper
 {
@@ -10,10 +10,16 @@ namespace iot_management_api.Helper
     {
         public AutoMapperProfile()
         {
-            CreateMap<User, UserModel>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
-            CreateMap<RegUser, User>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => Enum.Parse<UserRole>(src.Role)));
+            //CreateMap<User, UserModel>()
+            //    .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role.ToString()));
+            CreateMap<UserSignUp, Teacher>();
+            CreateMap<UserSignUp, Student>();
+
+            CreateMap<Teacher, TeacherModel>();
+            CreateMap<Student, StudentModel>()
+                .ForMember(dest => dest.GroupCode, opt => opt.MapFrom(src => src.Group.GroupCode));
+
+            CreateMap<User, UserModel>();
         }
     }
 }

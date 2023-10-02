@@ -1,5 +1,4 @@
-﻿using iot_management_api.Services;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,11 +12,9 @@ namespace iot_management_api.Helper
     {
         private readonly ILogger<JwtHandler> _logger;
         private readonly JwtValidator _jwtValidator;
-        private readonly IUserService _userService;
 
         public JwtHandler(ILogger<JwtHandler> logger,
             JwtValidator jwtValidator,
-            IUserService userService,
             IOptionsMonitor<JwtBearerOptions> options,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
@@ -26,7 +23,6 @@ namespace iot_management_api.Helper
         {
             _logger=logger;
             _jwtValidator=jwtValidator;
-            _userService=userService;
         }
 
 

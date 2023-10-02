@@ -1,15 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using iot_management_api.Entities.common;
 
 namespace iot_management_api.Entities
 {
-    public class Teacher
+    public class Teacher : User
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
 
-        public required User User { get; set; }
         public List<Subject> Subjects { get; set; } = new List<Subject>();
     }
 }
