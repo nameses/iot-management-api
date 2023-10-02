@@ -64,9 +64,10 @@ namespace iot_management_api.Helper
         {
             var excludedPaths = new[]
             {
-                "/api/auth/register",
-                "/api/auth/login",
-                "/api/validate"
+                "/api/auth/signup/teacher",
+                "/api/auth/signup/student",
+                "/api/auth/signin/teacher",
+                "/api/auth/signin/student"
             };
             var requestPath = context.Request.Path;
             return excludedPaths.Any(path => requestPath.StartsWithSegments(path));

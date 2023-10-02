@@ -44,9 +44,11 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
+
 builder.Services.AddTransient<JwtHandler>();
 builder.Services.AddTransient<JwtGenerator>();
 builder.Services.AddSingleton<JwtValidator>();
+
 builder.Services.AddSingleton<Encrypter>();
 
 //builder.Services.AddHttpClient();
@@ -55,8 +57,20 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 builder.Services.AddDbContext<AppDbContext>(option => option.UseSqlServer(connString));
 
 //jwt auth
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication()
     .AddScheme<JwtBearerOptions, JwtHandler>(JwtBearerDefaults.AuthenticationScheme, options => { });
+builder.Services.AddAuthorization(opts =>
+{
+    opts.AddPolicy("TeacherAccess", policy =>
+    {
+        policy.RequireClaim("role", "Teacher");
+    });
+    opts.AddPolicy("StudentAccess", policy =>
+    {
+        policy.RequireClaim("role", "Student");
+    });
+});
+
 //Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -123,6 +137,7 @@ app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

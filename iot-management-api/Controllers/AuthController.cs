@@ -90,7 +90,7 @@ namespace iot_management_api.Controllers
             _logger.LogInformation($"User(Id={user.Id}) password is correct");
 
             //token gen
-            var token = _jwtGenerator.GenerateToken(user.Id, UserRole.Student);
+            var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Student);
             HttpContext.Response.Cookies.Append("auth_token", token);
 
             //response
@@ -122,7 +122,7 @@ namespace iot_management_api.Controllers
             _logger.LogInformation($"User(Id={user.Id}) password is correct");
 
             //token gen
-            var token = _jwtGenerator.GenerateToken(user.Id, UserRole.Teacher);
+            var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Teacher);
             HttpContext.Response.Cookies.Append("auth_token", token);
 
             //response

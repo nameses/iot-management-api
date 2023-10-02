@@ -16,7 +16,7 @@ namespace iot_management_api.Helper
         {
             _conf=conf;
         }
-        public string GenerateToken(int userId, UserRole userRole)
+        public string GenerateToken(int userId, string email, UserRole userRole)
         {
             var secret = Encoding.ASCII.GetBytes(_conf.Value.Key!);
             var securityKey = new SymmetricSecurityKey(secret);
@@ -29,7 +29,8 @@ namespace iot_management_api.Helper
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("id", userId.ToString()),
-                    new Claim("role", userRole.ToString())
+                    new Claim(ClaimTypes.Email, email.ToString()),
+                    new Claim(ClaimTypes.Role, userRole.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),
                 Issuer = issuer,

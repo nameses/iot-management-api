@@ -26,6 +26,7 @@ namespace iot_management_api.Services
             var group = await _context.Groups
                 .Include(x => x.Students)
                 .Include(x => x.Schedules)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(x => x.GroupCode == groupCode);
 
             if (group==null)
@@ -49,6 +50,7 @@ namespace iot_management_api.Services
             var group = await _context.Groups
                 .Include(x => x.Students)
                 .Include(x => x.Schedules)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (group==null)
