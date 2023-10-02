@@ -1,4 +1,5 @@
 ﻿using iot_management_api.Configuration;
+using iot_management_api.Entities.common;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,7 +16,7 @@ namespace iot_management_api.Helper
         {
             _conf=conf;
         }
-        public string GenerateToken(int userId)
+        public string GenerateToken(int userId, UserRole userRole)
         {
             var secret = Encoding.ASCII.GetBytes(_conf.Value.Key!);
             var securityKey = new SymmetricSecurityKey(secret);
@@ -28,6 +29,7 @@ namespace iot_management_api.Helper
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("id", userId.ToString()),
+                    new Claim("role", userRole.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),
                 Issuer = issuer,
