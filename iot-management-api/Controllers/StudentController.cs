@@ -20,6 +20,7 @@ namespace iot_management_api.Controllers
             _mapper=mapper;
             _logger=logger;
         }
+
         [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
         [Route("get/{id}")]

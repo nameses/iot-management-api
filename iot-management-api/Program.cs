@@ -41,6 +41,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 //services
+builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();

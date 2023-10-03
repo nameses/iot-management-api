@@ -42,7 +42,7 @@ namespace iot_management_api.Controllers
                 _logger.LogError($"User was not created");
                 return BadRequest("Unknown Error. User was not created");
             }
-
+            //response
             return Ok(new SignUpResponse
             {
                 CreatedId = createdId
