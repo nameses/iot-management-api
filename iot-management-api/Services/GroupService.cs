@@ -1,4 +1,5 @@
-﻿using iot_management_api.Context;
+﻿using AutoMapper;
+using iot_management_api.Context;
 using iot_management_api.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,35 +9,40 @@ namespace iot_management_api.Services
     {
         Task<Group?> GetByGroupCode(string? groupCode);
         Task<Group?> GetById(int? id);
-        Task<int?> CreateAsync(Group group);
+        Task<int?> CreateAsync(Group entity);
+        Task<bool> UpdateAsync(int id, Group entity);
+        Task<bool> DeleteAsync(int id);
     }
     public class GroupService : IGroupService
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
         private readonly ILogger<GroupService> _logger;
 
         public GroupService(AppDbContext context,
+            IMapper mapper,
             ILogger<GroupService> logger)
         {
             _context=context;
+            _mapper=mapper;
             _logger=logger;
         }
         public async Task<Group?> GetByGroupCode(string? groupCode)
         {
-            var group = await _context.Groups
+            var entity = await _context.Groups
                 .Include(x => x.Students)
                 .Include(x => x.Schedules)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(x => x.GroupCode == groupCode);
 
-            if (group==null)
+            if (entity==null)
             {
                 _logger.LogInformation($"Group(groupCode={groupCode}) not found");
                 return null;
             }
 
             _logger.LogInformation($"Group by groupCode={groupCode} successfully found");
-            return group;
+            return entity;
         }
 
         public async Task<Group?> GetById(int? id)
@@ -47,36 +53,70 @@ namespace iot_management_api.Services
                 return null;
             }
 
-            var group = await _context.Groups
+            var entity = await _context.Groups
                 .Include(x => x.Students)
                 .Include(x => x.Schedules)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(x => x.Id == id);
 
-            if (group==null)
+            if (entity==null)
             {
                 _logger.LogInformation($"Group(id={id}) not found");
                 return null;
             }
 
             _logger.LogInformation($"Group(id={id}) successfully found");
-            return group;
+            return entity;
         }
 
-        public async Task<int?> CreateAsync(Group group)
+        public async Task<int?> CreateAsync(Group entity)
         {
-            if (group==null)
+            if (entity==null)
             {
                 _logger.LogInformation($"Group for creation is not valid");
                 return null;
             }
 
-            await _context.Groups.AddAsync(group);
+            await _context.Groups.AddAsync(entity);
 
             await _context.SaveChangesAsync();
-            _logger.LogInformation($"Created group with ID {group.Id}");
+            _logger.LogInformation($"Created group with ID {entity.Id}");
 
-            return group.Id;
+            return entity.Id;
+        }
+
+        public async Task<bool> UpdateAsync(int id, Group entity)
+        {
+            var dbEntity = await _context.Groups.FirstOrDefaultAsync(x => x.Id == id);
+            if (dbEntity==null)
+            {
+                _logger.LogInformation($"Group with ID {id} not found db");
+                return false;
+            }
+
+            dbEntity.GroupCode = entity.GroupCode;
+            dbEntity.Term = entity.Term;
+
+            _context.Groups.Update(dbEntity);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var dbEntity = await _context.Groups.FirstOrDefaultAsync(x => x.Id == id);
+
+            if (dbEntity==null)
+            {
+                _logger.LogWarning($"Group with ID {id} not found db");
+                return false;
+            }
+
+            _context.Groups.Remove(dbEntity);
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
