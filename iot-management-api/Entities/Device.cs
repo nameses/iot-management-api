@@ -8,8 +8,10 @@ namespace iot_management_api.Entities
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public int Amount { get; set; }
+        public required int Amount { get; set; }
+        public int? DeviceInfoId { get; set; }
         public required DeviceInfo DeviceInfo { get; set; }
+        public int? RoomId { get; set; }
         public required Room Room { get; set; }
     }
 }

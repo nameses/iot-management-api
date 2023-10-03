@@ -76,6 +76,7 @@ namespace iot_management_api.Services
             }
 
             student.Password = _encrypter.Encrypt(student.Password);
+            student.CreatedAt = DateTime.Now;
 
             var group = await _groupService.GetByGroupCode(groupCode);
 
