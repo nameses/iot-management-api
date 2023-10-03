@@ -4,6 +4,8 @@ using iot_management_api.Entities.common;
 using iot_management_api.Models;
 using iot_management_api.Models.common;
 using static iot_management_api.Controllers.AuthController;
+using static iot_management_api.Controllers.GroupController;
+using static iot_management_api.Controllers.RoomController;
 
 namespace iot_management_api.Helper
 {
@@ -24,6 +26,13 @@ namespace iot_management_api.Helper
 
             CreateMap<Group, GroupModel>()
                 .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.Students));
+            CreateMap<GroupReq, Group>();
+
+            CreateMap<Room, RoomModel>()
+                .ForMember(dest => dest.Devices, opt => opt.MapFrom(src => src.Devices))
+                .ForMember(dest => dest.Schedules, opt => opt.MapFrom(src => src.Schedules));
+            CreateMap<RoomReq, Room>();
+
         }
     }
 }
