@@ -33,6 +33,10 @@ namespace iot_management_api.Helper
                 .ForMember(dest => dest.Schedules, opt => opt.MapFrom(src => src.Schedules));
             CreateMap<RoomReq, Room>();
 
+            CreateMap<DeviceInfo, DeviceInfo>();
+
+            CreateMap<Device, Device>();
+
         }
     }
 }
