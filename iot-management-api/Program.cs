@@ -41,9 +41,12 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 //services
-builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<IDeviceInfoService, DeviceInfoService>();
+builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 
 builder.Services.AddTransient<JwtHandler>();

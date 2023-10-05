@@ -86,7 +86,7 @@ namespace iot_management_api.Services
             var dbEntity = await _context.Rooms.FirstOrDefaultAsync(x => x.Id == id);
             if (dbEntity==null)
             {
-                _logger.LogInformation($"Group with ID {id} not found db");
+                _logger.LogInformation($"Room with ID {id} not found db");
                 return false;
             }
 
@@ -107,7 +107,7 @@ namespace iot_management_api.Services
 
             if (dbEntity==null)
             {
-                _logger.LogWarning($"Group with ID {id} not found db");
+                _logger.LogWarning($"Room with ID {id} not found db");
                 return false;
             }
 
