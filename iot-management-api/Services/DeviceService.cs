@@ -8,7 +8,7 @@ namespace iot_management_api.Services
     public interface IDeviceService
     {
         Task<Device?> GetById(int? id);
-        Task<int?> CreateAsync(Device entity);
+        Task<int?> CreateAsync(Device entity, DeviceInfo deviceInfo, int? roomNumber);
         Task<bool> UpdateAsync(int id, Device entity);
         Task<bool> DeleteAsync(int id);
     }
