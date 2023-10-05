@@ -4,6 +4,7 @@ using iot_management_api.Entities.common;
 using iot_management_api.Models;
 using iot_management_api.Models.common;
 using static iot_management_api.Controllers.AuthController;
+using static iot_management_api.Controllers.DeviceController;
 using static iot_management_api.Controllers.GroupController;
 using static iot_management_api.Controllers.RoomController;
 using static iot_management_api.Controllers.SubjectController;
@@ -35,8 +36,11 @@ namespace iot_management_api.Helper
             CreateMap<RoomReq, Room>();
 
             CreateMap<DeviceInfo, DeviceInfo>();
+            CreateMap<DeviceInfo, DeviceInfoModel>();
+            CreateMap<DeviceReq, DeviceInfo>();
 
             CreateMap<Device, Device>();
+            CreateMap<Device, DeviceModel>();
 
             CreateMap<Subject, SubjectModel>()
                 .ForMember(dest => dest.Teacher, opt => opt.MapFrom(src => src.Teacher))

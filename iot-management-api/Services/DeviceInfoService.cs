@@ -41,7 +41,7 @@ namespace iot_management_api.Services
                 return null;
             }
 
-            return entity;
+            return dbEntity;
         }
 
         public async Task<DeviceInfo?> GetById(int? id)

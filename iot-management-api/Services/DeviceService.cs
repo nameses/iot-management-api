@@ -72,19 +72,27 @@ namespace iot_management_api.Services
                 _logger.LogWarning($"Room with code={roomNumber} not found");
                 return null;
             }
+
+            entity.Room = room;
+
             //get deviceInfo or create new
             var dbDeviceInfo = await _deviceInfoService.GetByDeviceInfo(deviceInfo);
             if (dbDeviceInfo == null)
             {
                 var id = await _deviceInfoService.CreateAsync(deviceInfo);
-                if (id==null)
-                {
-                    _logger.LogInformation($"DeviceInfo not found and could not be created");
-                    return null;
-                }
-                dbDeviceInfo = _mapper.Map<DeviceInfo>(deviceInfo);
-                dbDeviceInfo.Id = id.Value;
+                //if (id==null)
+                //{
+                //    _logger.LogInformation($"DeviceInfo not found and could not be created");
+                //    return null;
+                //}
+                //dbDeviceInfo = _mapper.Map<DeviceInfo>(deviceInfo);
+                //dbDeviceInfo.Id = id.Value;
+                entity.DeviceInfoId = id;
             }
+            else entity.DeviceInfoId = dbDeviceInfo.Id;
+
+
+            //entity.DeviceInfo = dbDeviceInfo;
 
             await _context.Devices.AddAsync(entity);
 

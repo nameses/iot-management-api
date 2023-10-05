@@ -10,8 +10,8 @@ namespace iot_management_api.Entities
         public int Id { get; set; }
         public required int Amount { get; set; }
         public int? DeviceInfoId { get; set; }
-        public required DeviceInfo DeviceInfo { get; set; }
+        public DeviceInfo? DeviceInfo { get; set; }
         public int? RoomId { get; set; }
-        public required Room Room { get; set; }
+        public Room? Room { get; set; }
     }
 }
