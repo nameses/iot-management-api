@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
@@ -28,25 +29,20 @@ namespace iot_management_api.Helper
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            string? token;
+            //string? token;
 
             if (ShouldSkip(Context)) return AuthenticateResult.NoResult();
 
-            if (!Context.Request.Headers.TryGetValue("Authorization", out var authorizationHeaderValues))
+            if (!Context.Request.Cookies.TryGetValue("token", out var token))
             {
                 Context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                return AuthenticateResult.Fail("Authorization header not found.");
+                return AuthenticateResult.Fail("Token in HttpOnly cookies not found.");
             }
 
-            var authorizationHeader = authorizationHeaderValues.FirstOrDefault();
-            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
-            {
-                return AuthenticateResult.Fail("Bearer token not found in Authorization header.");
-            }
+            if (token.IsNullOrEmpty())
+                return AuthenticateResult.Fail("Token is null or empty in HttpOnly cookies.");
 
-            token = authorizationHeader.Substring("Bearer ".Length).Trim();
-
-            var userId = _jwtValidator.Validate(token);
+            var userId = _jwtValidator.Validate(token!);
 
             if (userId==null)
             {
