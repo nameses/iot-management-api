@@ -10,7 +10,7 @@ namespace iot_management_api.Services
         Task<DeviceInfo?> GetByDeviceInfo(DeviceInfo entity);
         Task<DeviceInfo?> GetById(int? id);
         Task<int?> CreateAsync(DeviceInfo entity);
-        Task<bool> UpdateAsync(int id, DeviceInfo entity);
+        Task<bool> UpdateAsync(int? id, DeviceInfo entity);
         Task<bool> DeleteAsync(int id);
     }
     public class DeviceInfoService : IDeviceInfoService
@@ -82,7 +82,7 @@ namespace iot_management_api.Services
             return entity.Id;
         }
 
-        public async Task<bool> UpdateAsync(int id, DeviceInfo entity)
+        public async Task<bool> UpdateAsync(int? id, DeviceInfo entity)
         {
             var dbEntity = await _context.DeviceInfos.FirstOrDefaultAsync(x => x.Id == id);
             if (dbEntity==null)

@@ -23,9 +23,10 @@ namespace iot_management_api.Controllers
             _mapper=mapper;
             _logger=logger;
         }
+
         [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
-        [Route("get/{id}")]
+        [Route("{id}")]
         [ProducesResponseType(typeof(DeviceModel), 200)]
         public async Task<IActionResult> GetById(int id)
         {
@@ -35,6 +36,19 @@ namespace iot_management_api.Controllers
                 return NotFound();
 
             return Ok(_mapper.Map<DeviceModel>(entity));
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "TeacherAccess")]
+        [ProducesResponseType(typeof(List<DeviceModel>), 200)]
+        public async Task<IActionResult> GetByRoom([FromQuery] int room)
+        {
+            var entities = await _deviceService.GetByRoom(room);
+
+            if (entities==null)
+                return NotFound();
+
+            return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entities));
         }
 
         [HttpPost]
@@ -59,17 +73,20 @@ namespace iot_management_api.Controllers
             });
         }
 
-        //[HttpPut]
-        //[Route("{id}")]
-        //[Authorize(Policy = "TeacherAccess")]
-        //public async Task<IActionResult> Update(int id, [FromBody] DeviceReq room)
-        //{
-        //    var res = await _roomService.UpdateAsync(id, _mapper.Map<Room>(room));
+        [HttpPut]
+        [Route("{id}")]
+        [Authorize(Policy = "TeacherAccess")]
+        public async Task<IActionResult> Update(int id, [FromBody] DeviceReq req)
+        {
+            if (id!=req.Id)
+                return BadRequest();
 
-        //    if (!res) return NotFound();
+            var res = await _deviceService.UpdateAsync(id, _mapper.Map<Device>(req));
 
-        //    return Ok();
-        //}
+            if (!res) return NotFound();
+
+            return Ok();
+        }
 
         [HttpDelete]
         [Route("{id}")]
@@ -85,6 +102,7 @@ namespace iot_management_api.Controllers
 
         public class DeviceReq
         {
+            public required int Id { get; set; }
             public required string Type { get; set; }
             public required string Name { get; set; }
             public required string Model { get; set; }

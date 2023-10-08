@@ -2,12 +2,14 @@
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace iot_management_api.Services
 {
     public interface IDeviceService
     {
         Task<Device?> GetById(int? id);
+        Task<IEnumerable<Device>?> GetByRoom(int? room);
         Task<int?> CreateAsync(Device entity, DeviceInfo deviceInfo, int? roomNumber);
         Task<bool> UpdateAsync(int id, Device entity);
         Task<bool> DeleteAsync(int id);
@@ -57,6 +59,36 @@ namespace iot_management_api.Services
             return entity;
         }
 
+        public async Task<IEnumerable<Device>?> GetByRoom(int? roomNumber)
+        {
+            if (roomNumber==null)
+            {
+                _logger.LogInformation($"RoomNumber can not be null");
+                return null;
+            }
+
+            var entities = await _context.Devices
+                .Include(x => x.DeviceInfo)
+                .Include(x => x.Room)
+                .Where(x => x.Room!.Number == roomNumber)
+                .Select(x => new Device
+                {
+                    Id = x.Id,
+                    Amount = x.Amount,
+                    DeviceInfo = x.DeviceInfo,
+                })
+                .ToListAsync();
+
+            if (entities.IsNullOrEmpty())
+            {
+                _logger.LogInformation($"Devices(roomNumber={roomNumber}) not found");
+                return null;
+            }
+
+            _logger.LogInformation($"Devices(roomNumber={roomNumber}) successfully found");
+            return entities;
+        }
+
         public async Task<int?> CreateAsync(Device entity, DeviceInfo deviceInfo, int? roomNumber)
         {
             if (entity==null || deviceInfo==null || roomNumber==null)
@@ -104,17 +136,30 @@ namespace iot_management_api.Services
 
         public async Task<bool> UpdateAsync(int id, Device entity)
         {
-            var dbEntity = await _context.Devices.FirstOrDefaultAsync(x => x.Id == id);
+            var dbEntity = await _context.Devices
+                .Include(x => x.DeviceInfo)
+                .Include(x => x.Room)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (dbEntity==null)
             {
                 _logger.LogInformation($"Device with ID {id} not found db");
                 return false;
             }
-
+            //room update
+            if (entity.Room!=null && entity.Room?.Number!=null
+                && entity.Room?.Number!=dbEntity.Room?.Number)
+            {
+                var room = await _roomService.GetByNumber(entity.Room?.Number);
+                if (room==null) return false;
+                dbEntity.Room = room;
+                dbEntity.RoomId = room.Id;
+            }
+            //device update
             dbEntity.Amount = entity.Amount;
+            //deviceInfo update
+            await _deviceInfoService.UpdateAsync(id, entity.DeviceInfo!);
 
             _context.Devices.Update(dbEntity);
-
             await _context.SaveChangesAsync();
             return true;
         }
