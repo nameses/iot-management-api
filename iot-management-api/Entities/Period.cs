@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using iot_management_api.Entities.common;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace iot_management_api.Entities
@@ -15,30 +16,5 @@ namespace iot_management_api.Entities
         public SemesterEnum Semester { get; set; }
         public int Year { get; set; }
         public string? Lable { get; set; }
-
-        public enum DayEnum
-        {
-            Monday,
-            Tuesday,
-            Wednesday,
-            Thursday,
-            Friday,
-            Saturday,
-            Sunday
-        }
-
-        public enum WeekEnum
-        {
-            First,
-            Second
-        }
-
-        public enum SemesterEnum
-        {
-            First,
-            Second
-        }
     }
-
-
 }
