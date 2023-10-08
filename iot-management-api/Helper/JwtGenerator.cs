@@ -29,8 +29,8 @@ namespace iot_management_api.Helper
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim("id", userId.ToString()),
-                    new Claim(ClaimTypes.Email, email.ToString()),
-                    new Claim(ClaimTypes.Role, userRole.ToString())
+                    new Claim("email", email.ToString()),
+                    new Claim("role", userRole.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),
                 Issuer = issuer,

@@ -23,7 +23,7 @@ namespace iot_management_api.Controllers
 
         [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
-        [Route("get/{id}")]
+        [Route("{id}")]
         [ProducesResponseType(typeof(StudentModel), 200)]
         public async Task<IActionResult> GetById(int id)
         {
