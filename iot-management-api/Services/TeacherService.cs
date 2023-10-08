@@ -67,6 +67,7 @@ namespace iot_management_api.Services
             }
 
             teacher.Password = _encrypter.Encrypt(teacher.Password);
+            teacher.CreatedAt = DateTime.Now;
 
             await _context.Teachers.AddAsync(teacher);
             await _context.SaveChangesAsync();

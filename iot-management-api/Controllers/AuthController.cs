@@ -42,7 +42,7 @@ namespace iot_management_api.Controllers
                 _logger.LogError($"User was not created");
                 return BadRequest("Unknown Error. User was not created");
             }
-
+            //response
             return Ok(new SignUpResponse
             {
                 CreatedId = createdId
@@ -70,7 +70,7 @@ namespace iot_management_api.Controllers
 
         [HttpPost]
         [Route("signin/student")]
-        [ProducesResponseType(typeof(StudentSignInResponse), 200)]
+        [ProducesResponseType(typeof(StudentModel), 200)]
         public async Task<IActionResult> SignInStudent([FromBody] SignInRequest request)
         {
             //user = await _teacherService.GetByEmail(request.User.Email);
@@ -91,19 +91,23 @@ namespace iot_management_api.Controllers
 
             //token gen
             var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Student);
-            HttpContext.Response.Cookies.Append("auth_token", token);
+            HttpContext.Response.Cookies.Append("token", token,
+                new CookieOptions()
+                {
+                    Expires = DateTime.Now.AddDays(1),
+                    HttpOnly = true,
+                    Secure = true,
+                    IsEssential = true,
+                    SameSite = SameSiteMode.None
+                });
 
             //response
-            return Ok(new StudentSignInResponse
-            {
-                Token = token,
-                User = _mapper.Map<StudentModel>(user)
-            });
+            return Ok(_mapper.Map<StudentModel>(user));
         }
 
         [HttpPost]
         [Route("signin/teacher")]
-        [ProducesResponseType(typeof(TeacherSignInResponse), 200)]
+        [ProducesResponseType(typeof(TeacherModel), 200)]
         public async Task<IActionResult> SignInTeacher([FromBody] SignInRequest request)
         {
             User? user = await _teacherService.GetByEmail(request.User.Email);
@@ -123,14 +127,26 @@ namespace iot_management_api.Controllers
 
             //token gen
             var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Teacher);
-            HttpContext.Response.Cookies.Append("auth_token", token);
+            HttpContext.Response.Cookies.Append("token", token,
+                new CookieOptions()
+                {
+                    Expires = DateTime.Now.AddDays(1),
+                    HttpOnly = true,
+                    Secure = true,
+                    IsEssential = true,
+                    SameSite = SameSiteMode.None
+                });
 
             //response
-            return Ok(new TeacherSignInResponse
-            {
-                Token = token,
-                User = _mapper.Map<TeacherModel>(user)
-            });
+            return Ok(_mapper.Map<TeacherModel>(user));
+        }
+
+        [HttpGet]
+        [Route("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            HttpContext.Response.Cookies.Delete("token");
+            return Ok();
         }
 
         public class UserSignUp
@@ -162,18 +178,6 @@ namespace iot_management_api.Controllers
                 public required string Email { get; set; }
                 public required string Password { get; set; }
             }
-        }
-
-        public class StudentSignInResponse
-        {
-            public required string Token { get; set; }
-            public required StudentModel User { get; set; }
-        }
-
-        public class TeacherSignInResponse
-        {
-            public required string Token { get; set; }
-            public required TeacherModel User { get; set; }
         }
     }
 }

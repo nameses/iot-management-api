@@ -4,6 +4,7 @@ using iot_management_api.Entities.common;
 using iot_management_api.Models;
 using iot_management_api.Models.common;
 using static iot_management_api.Controllers.AuthController;
+using static iot_management_api.Controllers.DeviceController;
 
 namespace iot_management_api.Helper
 {
@@ -24,6 +25,39 @@ namespace iot_management_api.Helper
 
             CreateMap<Group, GroupModel>()
                 .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.Students));
+            //CreateMap<GroupReq, Group>();
+
+            CreateMap<Room, RoomModel>();
+            //.ForMember(dest => dest.Devices, opt => opt.MapFrom(src => src.Devices))
+            //.ForMember(dest => dest.Schedules, opt => opt.MapFrom(src => src.Schedules));
+            //CreateMap<RoomReq, Room>();
+
+            CreateMap<DeviceInfo, DeviceInfo>();
+            CreateMap<DeviceInfo, DeviceInfoModel>();
+            CreateMap<DeviceReq, DeviceInfo>();
+
+            CreateMap<Device, Device>();
+            CreateMap<Device, DeviceModel>();
+            CreateMap<DeviceReq, Device>()
+                .ForPath(dest => dest.DeviceInfo.Name, opt => opt.MapFrom(src => src.Name))
+                .ForPath(dest => dest.DeviceInfo.Type, opt => opt.MapFrom(src => src.Type))
+                .ForPath(dest => dest.DeviceInfo.Model, opt => opt.MapFrom(src => src.Model))
+                .ForPath(dest => dest.DeviceInfo.Description, opt => opt.MapFrom(src => src.Description))
+                .ForPath(dest => dest.Room.Number, opt => opt.MapFrom(src => src.RoomNumber));
+
+
+
+            CreateMap<Subject, SubjectModel>()
+                .ForMember(dest => dest.Teacher, opt => opt.MapFrom(src => src.Teacher))
+                .ForMember(dest => dest.Schedules, opt => opt.MapFrom(src => src.Schedules));
+            //CreateMap<SubjectReq, Subject>();
+
+            CreateMap<Schedule, ScheduleModel>()
+                .ForMember(dest => dest.GroupCodes, opt => opt.MapFrom(src => src.Groups.Select(x => x.GroupCode)));
+            CreateMap<Subject, SubjectDataModel>()
+                .ForPath(dest => dest.TeacherFullName, opt => opt.MapFrom(src => src.Teacher.Name + " " + src.Teacher.Surname));
+            CreateMap<Period, PeriodModel>();
+
         }
     }
 }
