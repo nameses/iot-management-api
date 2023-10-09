@@ -25,6 +25,20 @@ namespace iot_management_api.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "StudentAccess")]
+        [Route("available")]
+        [ProducesResponseType(typeof(IEnumerable<DeviceModel>), 200)]
+        public async Task<IActionResult> GetAvailable(DateOnly date, int scheduleId)
+        {
+            var entity = await _deviceService.GetAvailable(date, scheduleId);
+
+            if (entity==null)
+                return NotFound();
+
+            return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entity));
+        }
+
+        [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
         [Route("{id}")]
         [ProducesResponseType(typeof(DeviceModel), 200)]

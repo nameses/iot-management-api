@@ -56,6 +56,7 @@ builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddTransient<JwtHandler>();
 builder.Services.AddTransient<JwtGenerator>();
 builder.Services.AddSingleton<JwtValidator>();
+builder.Services.AddSingleton<StudyWeekService>();
 
 builder.Services.AddSingleton<Encrypter>();
 

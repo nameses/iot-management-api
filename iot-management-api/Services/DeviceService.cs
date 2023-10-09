@@ -8,6 +8,7 @@ namespace iot_management_api.Services
 {
     public interface IDeviceService
     {
+        Task<IEnumerable<Device>?> GetAvailable(DateOnly date, int scheduleId);
         Task<Device?> GetById(int? id);
         Task<IEnumerable<Device>?> GetByRoom(int? room);
         Task<int?> CreateAsync(Device entity, DeviceInfo deviceInfo, int? roomNumber);
@@ -35,6 +36,52 @@ namespace iot_management_api.Services
             _logger=logger;
         }
 
+        public async Task<IEnumerable<Device>?> GetAvailable(DateOnly date, int scheduleId)
+        {
+            //get room from schedule
+            //get all devices from room
+            //get bookings with devices
+            //count real amount of devices
+            //------------
+            //get schedule entity + room
+            var schedule = await _context.Schedules
+                .Include(x => x.Room)
+                .FirstOrDefaultAsync();
+            if (schedule == null) return null;
+
+            //get all devices from room
+            var devices = await _context.Devices
+                .Include(x => x.DeviceInfo)
+                .Where(x => x.RoomId==schedule.RoomId)
+                .ToListAsync();
+            if (devices==null) return null;
+
+            //get bookings with devices (search by scheduleID, status and date)
+            var bookings = await _context.Bookings
+                .Where(x => x.ScheduleId == schedule.Id && x.Date == date && x.Status==BookingStatus.Approved)
+                .ToListAsync();
+            //dictionary DeviceId - Count(Booked devices)
+            var deviceBookingCounts = bookings
+                .GroupBy(b => b.DeviceId)
+                .ToDictionary(
+                    group => group.Key ?? 0, // Use 0 as the default key if DeviceId is null
+                    group => group.Count()
+                );
+
+            foreach (var device in devices)
+            {
+                if (deviceBookingCounts.TryGetValue(device.Id, out int bookedCount))
+                {
+                    device.Amount -= bookedCount;
+
+                    //delete or set amount to zero?
+                    if (device.Amount<=0) //device.Amount = 0;
+                        devices.Remove(device);
+                }
+            }
+
+            return devices;
+        }
         public async Task<Device?> GetById(int? id)
         {
             if (id==null)

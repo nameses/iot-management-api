@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using iot_management_api.Entities.common;
+using iot_management_api.Helper;
+using iot_management_api.Models;
 using iot_management_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +13,26 @@ namespace iot_management_api.Controllers
     public class ScheduleController : Controller
     {
         private readonly IScheduleService _scheduleService;
+        private readonly StudyWeekService _weekService;
         private readonly IMapper _mapper;
         private readonly ILogger<ScheduleController> _logger;
 
-        public ScheduleController(IScheduleService scheduleService, IMapper mapper, ILogger<ScheduleController> logger)
+        public ScheduleController(
+            IScheduleService scheduleService,
+            StudyWeekService weekService,
+            IMapper mapper,
+            ILogger<ScheduleController> logger)
         {
             _scheduleService = scheduleService;
+            _weekService=weekService;
             _mapper=mapper;
             _logger=logger;
         }
 
         [HttpGet]
         [Authorize]
-        //[Route("full")]
-        //[ProducesResponseType(typeof(Dictionary<, ScheduleModel>), 200)]
+        [Route("full")]
+        [ProducesResponseType(typeof(ScheduleFullResponse), 200)]
         public async Task<IActionResult> GetFull()
         {
             var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
@@ -35,24 +43,17 @@ namespace iot_management_api.Controllers
             if (scheduleDict==null)
                 return NotFound();
 
-            return Ok(scheduleDict);
-            //    new
-            //{
-            //    schedule = scheduleDict,
-            //currentWeek = GetCurrentWeek(),
-            //});
+            return Ok(new ScheduleFullResponse
+            {
+                Schedule = scheduleDict,
+                CurrentWeek = _weekService.GetCurrentWeek(),
+            });
         }
-        //private int GetCurrentWeek()
-        //{
-        //    var date = DateTime.Now;
-        //    DateTime firstMonthDay = new DateTime(date.Year, date.Month, 1);
-        //    DateTime firstMonthMonday = firstMonthDay.AddDays((DayOfWeek.Monday + 7 - firstMonthDay.DayOfWeek) % 7);
-        //    if (firstMonthMonday > date)
-        //    {
-        //        firstMonthDay = firstMonthDay.AddMonths(-1);
-        //        firstMonthMonday = firstMonthDay.AddDays((DayOfWeek.Monday + 7 - firstMonthDay.DayOfWeek) % 7);
-        //    }
-        //    return (date - firstMonthMonday).Days / 7 + 1;
-        //}
+
+        public class ScheduleFullResponse
+        {
+            public required Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>> Schedule { get; set; }
+            public required WeekEnum CurrentWeek { get; set; }
+        }
     }
 }
