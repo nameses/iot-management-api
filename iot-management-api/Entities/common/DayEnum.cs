@@ -7,7 +7,6 @@
         Wednesday,
         Thursday,
         Friday,
-        Saturday,
-        Sunday
+        Saturday
     }
 }

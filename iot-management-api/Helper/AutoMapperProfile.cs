@@ -45,8 +45,6 @@ namespace iot_management_api.Helper
                 .ForPath(dest => dest.DeviceInfo.Description, opt => opt.MapFrom(src => src.Description))
                 .ForPath(dest => dest.Room.Number, opt => opt.MapFrom(src => src.RoomNumber));
 
-
-
             CreateMap<Subject, SubjectModel>()
                 .ForMember(dest => dest.Teacher, opt => opt.MapFrom(src => src.Teacher))
                 .ForMember(dest => dest.Schedules, opt => opt.MapFrom(src => src.Schedules));
@@ -56,7 +54,11 @@ namespace iot_management_api.Helper
                 .ForMember(dest => dest.GroupCodes, opt => opt.MapFrom(src => src.Groups.Select(x => x.GroupCode)));
             CreateMap<Subject, SubjectDataModel>()
                 .ForPath(dest => dest.TeacherFullName, opt => opt.MapFrom(src => src.Teacher.Name + " " + src.Teacher.Surname));
-            CreateMap<Period, PeriodModel>();
+
+            CreateMap<Period, PeriodModel>()
+                .ForPath(dest => dest.StartTime, opt => opt.MapFrom(src => src.DayMapping!.StartTime))
+                .ForPath(dest => dest.EndTime, opt => opt.MapFrom(src => src.DayMapping!.EndTime))
+                .ForPath(dest => dest.SubjectNumber, opt => opt.MapFrom(src => src.DayMapping!.SubjectNumber));
 
         }
     }

@@ -27,6 +27,9 @@ namespace iot_management_api.Controllers
         [Authorize(Policy = "StudentAccess")]
         public async Task<IActionResult> BookDevice([FromRoute] int deviceId, [FromQuery] DateOnly date, int scheduleId)
         {
+            if (date<DateOnly.FromDateTime(DateTime.Now))
+                return BadRequest("Date is expired");
+
             var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
 
             var res = await _bookingService.BookDeviceAsync(deviceId, userId, date, scheduleId);

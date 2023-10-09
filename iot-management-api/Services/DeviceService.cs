@@ -192,19 +192,9 @@ namespace iot_management_api.Services
             if (dbDeviceInfo == null)
             {
                 var id = await _deviceInfoService.CreateAsync(deviceInfo);
-                //if (id==null)
-                //{
-                //    _logger.LogInformation($"DeviceInfo not found and could not be created");
-                //    return null;
-                //}
-                //dbDeviceInfo = _mapper.Map<DeviceInfo>(deviceInfo);
-                //dbDeviceInfo.Id = id.Value;
                 entity.DeviceInfoId = id;
             }
             else entity.DeviceInfoId = dbDeviceInfo.Id;
-
-
-            //entity.DeviceInfo = dbDeviceInfo;
 
             await _context.Devices.AddAsync(entity);
 

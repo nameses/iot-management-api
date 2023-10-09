@@ -67,6 +67,7 @@ namespace iot_management_api.Context
         }
 
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<DayMapping> DayMappings { get; set; }
         public DbSet<Device> Devices { get; set; }
         public DbSet<DeviceInfo> DeviceInfos { get; set; }
         public DbSet<Group> Groups { get; set; }

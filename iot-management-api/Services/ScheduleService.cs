@@ -92,6 +92,7 @@ namespace iot_management_api.Services
             return await _context.Schedules
                 .Include(x => x.Groups)
                 .Include(x => x.Period)
+                .Include(x => x.Period.DayMapping)
                 .Include(x => x.Subject)
                 .Include(x => x.Subject.Teacher)
                 .Include(x => x.Room)
@@ -115,6 +116,7 @@ namespace iot_management_api.Services
             return await _context.Schedules
                 .Include(x => x.Groups)
                 .Include(x => x.Period)
+                .Include(x => x.Period.DayMapping)
                 .Include(x => x.Subject)
                 .Include(x => x.Room)
                 .AsSplitQuery()
