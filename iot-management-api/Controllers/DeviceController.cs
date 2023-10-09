@@ -25,12 +25,12 @@ namespace iot_management_api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy = "StudentAccess")]
+        [Authorize]
         [Route("available")]
         [ProducesResponseType(typeof(IEnumerable<DeviceModel>), 200)]
         public async Task<IActionResult> GetAvailable(DateOnly date, int scheduleId)
         {
-            var entity = await _deviceService.GetAvailable(date, scheduleId);
+            var entity = await _deviceService.GetAvailableAsync(date, scheduleId);
 
             if (entity==null)
                 return NotFound();
@@ -44,7 +44,7 @@ namespace iot_management_api.Controllers
         [ProducesResponseType(typeof(DeviceModel), 200)]
         public async Task<IActionResult> GetById(int id)
         {
-            var entity = await _deviceService.GetById(id);
+            var entity = await _deviceService.GetByIdAsync(id);
 
             if (entity==null)
                 return NotFound();
@@ -57,7 +57,7 @@ namespace iot_management_api.Controllers
         [ProducesResponseType(typeof(List<DeviceModel>), 200)]
         public async Task<IActionResult> GetByRoom([FromQuery] int room)
         {
-            var entities = await _deviceService.GetByRoom(room);
+            var entities = await _deviceService.GetByRoomAsync(room);
 
             if (entities==null)
                 return NotFound();

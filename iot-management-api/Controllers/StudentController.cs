@@ -27,7 +27,7 @@ namespace iot_management_api.Controllers
         [ProducesResponseType(typeof(StudentModel), 200)]
         public async Task<IActionResult> GetById(int id)
         {
-            var student = await _studentService.GetById(id);
+            var student = await _studentService.GetByIdAsync(id);
 
             if (student==null)
             {

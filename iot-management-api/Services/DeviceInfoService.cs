@@ -7,8 +7,8 @@ namespace iot_management_api.Services
 {
     public interface IDeviceInfoService
     {
-        Task<DeviceInfo?> GetByDeviceInfo(DeviceInfo entity);
-        Task<DeviceInfo?> GetById(int? id);
+        Task<DeviceInfo?> GetByDeviceInfoAsync(DeviceInfo entity);
+        Task<DeviceInfo?> GetByIdAsync(int? id);
         Task<int?> CreateAsync(DeviceInfo entity);
         Task<bool> UpdateAsync(int? id, DeviceInfo entity);
         Task<bool> DeleteAsync(int id);
@@ -27,7 +27,7 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
-        public async Task<DeviceInfo?> GetByDeviceInfo(DeviceInfo entity)
+        public async Task<DeviceInfo?> GetByDeviceInfoAsync(DeviceInfo entity)
         {
             var dbEntity = await _context.DeviceInfos
                 .AsSplitQuery()
@@ -44,7 +44,7 @@ namespace iot_management_api.Services
             return dbEntity;
         }
 
-        public async Task<DeviceInfo?> GetById(int? id)
+        public async Task<DeviceInfo?> GetByIdAsync(int? id)
         {
             if (id==null)
             {

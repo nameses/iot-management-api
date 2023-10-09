@@ -7,8 +7,8 @@ namespace iot_management_api.Services
 {
     public interface ITeacherService
     {
-        Task<Teacher?> GetByEmail(string email);
-        Task<Teacher?> GetById(int? id);
+        Task<Teacher?> GetByEmailAsync(string email);
+        Task<Teacher?> GetByIdAsync(int? id);
         Task<int?> CreateAsync(Teacher teacher);
     }
     public class TeacherService : ITeacherService
@@ -24,7 +24,7 @@ namespace iot_management_api.Services
             _encrypter=encrypter;
         }
 
-        public async Task<Teacher?> GetByEmail(string email)
+        public async Task<Teacher?> GetByEmailAsync(string email)
         {
             var teacher = await _context.Teachers.FirstOrDefaultAsync(x => x.Email == email);
 
@@ -38,7 +38,7 @@ namespace iot_management_api.Services
             return teacher;
         }
 
-        public async Task<Teacher?> GetById(int? id)
+        public async Task<Teacher?> GetByIdAsync(int? id)
         {
             if (id==null)
             {

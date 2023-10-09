@@ -74,7 +74,7 @@ namespace iot_management_api.Controllers
         public async Task<IActionResult> SignInStudent([FromBody] SignInRequest request)
         {
             //user = await _teacherService.GetByEmail(request.User.Email);
-            User? user = await _studentService.GetByEmail(request.User.Email);
+            User? user = await _studentService.GetByEmailAsync(request.User.Email);
 
             if (user == null)
             {
@@ -110,7 +110,7 @@ namespace iot_management_api.Controllers
         [ProducesResponseType(typeof(TeacherModel), 200)]
         public async Task<IActionResult> SignInTeacher([FromBody] SignInRequest request)
         {
-            User? user = await _teacherService.GetByEmail(request.User.Email);
+            User? user = await _teacherService.GetByEmailAsync(request.User.Email);
 
             if (user == null)
             {

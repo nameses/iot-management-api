@@ -8,8 +8,8 @@ namespace iot_management_api.Services
 {
     public interface ISubjectService
     {
-        Task<Subject?> GetByName(string name, SubjectType type, int teacherId);
-        Task<Subject?> GetById(int? id);
+        Task<Subject?> GetByNameAsync(string name, SubjectType type, int teacherId);
+        Task<Subject?> GetByIdAsync(int? id);
         Task<int?> CreateAsync(Subject entity, int teacherId);
         Task<bool> UpdateAsync(int id, Subject entity);
         Task<bool> DeleteAsync(int id);
@@ -31,7 +31,7 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
-        public async Task<Subject?> GetByName(string name, SubjectType type, int teacherId)
+        public async Task<Subject?> GetByNameAsync(string name, SubjectType type, int teacherId)
         {
             var dbEntity = await _context.Subjects
                 .Where(x => x.Name == name && x.Type==type && x.TeacherId == teacherId)
@@ -43,7 +43,7 @@ namespace iot_management_api.Services
             return dbEntity;
         }
 
-        public async Task<Subject?> GetById(int? id)
+        public async Task<Subject?> GetByIdAsync(int? id)
         {
             if (id==null)
             {
@@ -76,7 +76,7 @@ namespace iot_management_api.Services
             }
             entity.TeacherId = teacherId;
 
-            var teacher = await _teacherService.GetById(teacherId);
+            var teacher = await _teacherService.GetByIdAsync(teacherId);
             if (teacher==null) return null;
             entity.Teacher = teacher;
 

@@ -7,8 +7,8 @@ namespace iot_management_api.Services
 {
     public interface IStudentService
     {
-        Task<Student?> GetByEmail(string email);
-        Task<Student?> GetById(int? id);
+        Task<Student?> GetByEmailAsync(string email);
+        Task<Student?> GetByIdAsync(int? id);
         Task<int?> CreateAsync(Student student, string? groupCode);
     }
     public class StudentService : IStudentService
@@ -28,7 +28,7 @@ namespace iot_management_api.Services
             _logger=logger;
             _encrypter=encrypter;
         }
-        public async Task<Student?> GetByEmail(string email)
+        public async Task<Student?> GetByEmailAsync(string email)
         {
             var student = await _context.Students
                 .Include(x => x.Group)
@@ -44,7 +44,7 @@ namespace iot_management_api.Services
             _logger.LogInformation($"Student by email={email} successfully found");
             return student;
         }
-        public async Task<Student?> GetById(int? id)
+        public async Task<Student?> GetByIdAsync(int? id)
         {
             if (id==null)
             {
@@ -78,7 +78,7 @@ namespace iot_management_api.Services
             student.Password = _encrypter.Encrypt(student.Password);
             student.CreatedAt = DateTime.Now;
 
-            var group = await _groupService.GetByGroupCode(groupCode);
+            var group = await _groupService.GetByGroupCodeAsync(groupCode);
 
             if (group == null)
             {
