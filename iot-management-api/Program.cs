@@ -43,7 +43,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 //services
-
+builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IDeviceInfoService, DeviceInfoService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
