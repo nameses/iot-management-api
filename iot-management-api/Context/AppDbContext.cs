@@ -1,4 +1,5 @@
 ﻿using iot_management_api.Entities;
+using iot_management_api.Helper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -53,6 +54,8 @@ namespace iot_management_api.Context
                 .WithMany()
                 .HasForeignKey(b => b.DeviceId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            DataSeeder.SeedData(builder);
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder builder)
@@ -65,7 +68,6 @@ namespace iot_management_api.Context
             builder.Properties<DateOnly>()
                 .HaveConversion<DateOnlyConverter>();
         }
-
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<DayMapping> DayMappings { get; set; }
         public DbSet<Device> Devices { get; set; }
