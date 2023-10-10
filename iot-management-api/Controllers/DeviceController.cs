@@ -90,7 +90,7 @@ namespace iot_management_api.Controllers
         [HttpPut]
         [Route("{id}")]
         [Authorize(Policy = "TeacherAccess")]
-        public async Task<IActionResult> Update(int id, [FromBody] DeviceReq req)
+        public async Task<IActionResult> Update(int id, [FromBody] DeviceUpdateReq req)
         {
             if (id!=req.Id)
                 return BadRequest();
@@ -116,7 +116,6 @@ namespace iot_management_api.Controllers
 
         public class DeviceReq
         {
-            public required int Id { get; set; }
             public required string Type { get; set; }
             public required string Name { get; set; }
             public required string Model { get; set; }
@@ -124,6 +123,10 @@ namespace iot_management_api.Controllers
             public required int Amount { get; set; }
             public required int RoomNumber { get; set; }
 
+        }
+        public class DeviceUpdateReq : DeviceReq
+        {
+            public required int Id { get; set; }
         }
     }
 }
