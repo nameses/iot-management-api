@@ -2,13 +2,15 @@
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace iot_management_api.Services
 {
     public interface IGroupService
     {
-        Task<Group?> GetByGroupCode(string? groupCode);
-        Task<Group?> GetById(int? id);
+        Task<IEnumerable<Group>?> GetAllAsync();
+        Task<Group?> GetByGroupCodeAsync(string? groupCode);
+        Task<Group?> GetByIdAsync(int? id);
         Task<int?> CreateAsync(Group entity);
         Task<bool> UpdateAsync(int id, Group entity);
         Task<bool> DeleteAsync(int id);
@@ -27,7 +29,16 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
-        public async Task<Group?> GetByGroupCode(string? groupCode)
+        public async Task<IEnumerable<Group>?> GetAllAsync()
+        {
+            var entities = await _context.Groups.ToListAsync();
+
+            if (entities.IsNullOrEmpty())
+                return null;
+
+            return entities;
+        }
+        public async Task<Group?> GetByGroupCodeAsync(string? groupCode)
         {
             var entity = await _context.Groups
                 .Include(x => x.Students)
@@ -45,7 +56,7 @@ namespace iot_management_api.Services
             return entity;
         }
 
-        public async Task<Group?> GetById(int? id)
+        public async Task<Group?> GetByIdAsync(int? id)
         {
             if (id==null)
             {

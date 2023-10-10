@@ -48,8 +48,6 @@ namespace iot_management_api.Helper
             {
                 return AuthenticateResult.Fail("Token validation failed.");
             }
-            //else
-            //Context.Items["User"] = _userService.GetById(userId);
 
             var principal = GetClaims(token);
 

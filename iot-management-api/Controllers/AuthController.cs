@@ -4,6 +4,7 @@ using iot_management_api.Entities.common;
 using iot_management_api.Helper;
 using iot_management_api.Models;
 using iot_management_api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace iot_management_api.Controllers
@@ -28,6 +29,30 @@ namespace iot_management_api.Controllers
             _logger=logger;
             _jwtGenerator=jwtGenerator;
             _mapper=mapper;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+            var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
+
+            if (userRole==UserRole.Student)
+            {
+                var user = await _studentService.GetByIdAsync(userId);
+
+                return Ok(_mapper.Map<StudentModel>(user));
+            }
+            if (userRole==UserRole.Teacher)
+            {
+                var user = await _teacherService.GetByIdAsync(userId);
+
+                return Ok(_mapper.Map<TeacherModel>(user));
+            }
+
+            return BadRequest();
         }
 
         [HttpPost]
@@ -74,7 +99,7 @@ namespace iot_management_api.Controllers
         public async Task<IActionResult> SignInStudent([FromBody] SignInRequest request)
         {
             //user = await _teacherService.GetByEmail(request.User.Email);
-            User? user = await _studentService.GetByEmail(request.User.Email);
+            User? user = await _studentService.GetByEmailAsync(request.User.Email);
 
             if (user == null)
             {
@@ -91,18 +116,14 @@ namespace iot_management_api.Controllers
 
             //token gen
             var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Student);
-            HttpContext.Response.Cookies.Append("token", token,
-                new CookieOptions()
-                {
-                    Expires = DateTime.Now.AddDays(1),
-                    HttpOnly = true,
-                    Secure = true,
-                    IsEssential = true,
-                    SameSite = SameSiteMode.None
-                });
+            HttpContext.Response.Cookies.Append("token", token);
 
             //response
-            return Ok(_mapper.Map<StudentModel>(user));
+            return Ok(new
+            {
+                user = _mapper.Map<StudentModel>(user),
+                token
+            });
         }
 
         [HttpPost]
@@ -110,7 +131,7 @@ namespace iot_management_api.Controllers
         [ProducesResponseType(typeof(TeacherModel), 200)]
         public async Task<IActionResult> SignInTeacher([FromBody] SignInRequest request)
         {
-            User? user = await _teacherService.GetByEmail(request.User.Email);
+            User? user = await _teacherService.GetByEmailAsync(request.User.Email);
 
             if (user == null)
             {
@@ -127,21 +148,19 @@ namespace iot_management_api.Controllers
 
             //token gen
             var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Teacher);
-            HttpContext.Response.Cookies.Append("token", token,
-                new CookieOptions()
-                {
-                    Expires = DateTime.Now.AddDays(1),
-                    HttpOnly = true,
-                    Secure = true,
-                    IsEssential = true,
-                    SameSite = SameSiteMode.None
-                });
+            HttpContext.Response.Cookies.Append("token", token);
 
             //response
-            return Ok(_mapper.Map<TeacherModel>(user));
+            return Ok(new
+            {
+                user = _mapper.Map<TeacherModel>(user),
+                token = token
+            });
+
         }
 
         [HttpGet]
+        [Authorize]
         [Route("logout")]
         public async Task<IActionResult> Logout()
         {

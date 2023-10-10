@@ -10,7 +10,7 @@ namespace iot_management_api.Services
 {
     public interface IScheduleService
     {
-        Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFull(UserRole userRole, int userId);
+        Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFullAsync(UserRole userRole, int userId);
     }
     public class ScheduleService : IScheduleService
     {
@@ -29,7 +29,7 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
-        public async Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFull(UserRole userRole, int userId)
+        public async Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFullAsync(UserRole userRole, int userId)
         {
             List<Schedule>? entities = null;
             if (userRole==UserRole.Student)
@@ -92,6 +92,7 @@ namespace iot_management_api.Services
             return await _context.Schedules
                 .Include(x => x.Groups)
                 .Include(x => x.Period)
+                .Include(x => x.Period.DayMapping)
                 .Include(x => x.Subject)
                 .Include(x => x.Subject.Teacher)
                 .Include(x => x.Room)
@@ -115,6 +116,7 @@ namespace iot_management_api.Services
             return await _context.Schedules
                 .Include(x => x.Groups)
                 .Include(x => x.Period)
+                .Include(x => x.Period.DayMapping)
                 .Include(x => x.Subject)
                 .Include(x => x.Room)
                 .AsSplitQuery()

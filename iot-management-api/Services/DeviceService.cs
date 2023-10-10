@@ -8,9 +8,10 @@ namespace iot_management_api.Services
 {
     public interface IDeviceService
     {
-        Task<IEnumerable<Device>?> GetAvailable(DateOnly date, int scheduleId);
-        Task<Device?> GetById(int? id);
-        Task<IEnumerable<Device>?> GetByRoom(int? room);
+        Task<bool> CheckIfDeviceAvailableAsync(int deviceId, DateOnly date, int scheduleId);
+        Task<IEnumerable<Device>?> GetAvailableAsync(DateOnly date, int scheduleId);
+        Task<Device?> GetByIdAsync(int? id);
+        Task<IEnumerable<Device>?> GetByRoomAsync(int? room);
         Task<int?> CreateAsync(Device entity, DeviceInfo deviceInfo, int? roomNumber);
         Task<bool> UpdateAsync(int id, Device entity);
         Task<bool> DeleteAsync(int id);
@@ -36,13 +37,44 @@ namespace iot_management_api.Services
             _logger=logger;
         }
 
-        public async Task<IEnumerable<Device>?> GetAvailable(DateOnly date, int scheduleId)
+        public async Task<bool> CheckIfDeviceAvailableAsync(int deviceId, DateOnly date, int scheduleId)
         {
-            //get room from schedule
-            //get all devices from room
-            //get bookings with devices
-            //count real amount of devices
-            //------------
+            //get schedule entity + room
+            var schedule = await _context.Schedules
+                .Include(x => x.Room)
+                .FirstOrDefaultAsync();
+            if (schedule == null) return false;
+
+            //get device from room
+            var device = await _context.Devices
+                .Include(x => x.DeviceInfo)
+                .FirstOrDefaultAsync(x => x.Id==deviceId);
+            if (device==null) return false;
+
+            //get bookings with devices (search by scheduleID, status and date)
+            var bookings = await _context.Bookings
+                .Where(x => x.ScheduleId == schedule.Id
+                    && x.DeviceId == deviceId
+                    && x.Date == date
+                    && x.Status==BookingStatus.Approved)
+                .ToListAsync();
+            //dictionary DeviceId - Count(Booked devices)
+            var deviceBookingCounts = bookings
+                .GroupBy(b => b.DeviceId)
+                .ToDictionary(
+                    group => group.Key ?? 0, // Use 0 as the default key if DeviceId is null
+                    group => group.Count()
+                );
+            //count real amount of devices and check if device available
+            if (deviceBookingCounts.TryGetValue(deviceId, out int bookedCount))
+                if (device.Amount-bookedCount<=0) //device.Amount = 0;
+                    return false;
+
+            return true;
+        }
+
+        public async Task<IEnumerable<Device>?> GetAvailableAsync(DateOnly date, int scheduleId)
+        {
             //get schedule entity + room
             var schedule = await _context.Schedules
                 .Include(x => x.Room)
@@ -67,7 +99,7 @@ namespace iot_management_api.Services
                     group => group.Key ?? 0, // Use 0 as the default key if DeviceId is null
                     group => group.Count()
                 );
-
+            //count real amount of devices
             foreach (var device in devices)
             {
                 if (deviceBookingCounts.TryGetValue(device.Id, out int bookedCount))
@@ -82,7 +114,8 @@ namespace iot_management_api.Services
 
             return devices;
         }
-        public async Task<Device?> GetById(int? id)
+
+        public async Task<Device?> GetByIdAsync(int? id)
         {
             if (id==null)
             {
@@ -106,7 +139,7 @@ namespace iot_management_api.Services
             return entity;
         }
 
-        public async Task<IEnumerable<Device>?> GetByRoom(int? roomNumber)
+        public async Task<IEnumerable<Device>?> GetByRoomAsync(int? roomNumber)
         {
             if (roomNumber==null)
             {
@@ -144,7 +177,7 @@ namespace iot_management_api.Services
                 return null;
             }
             //get room by roomNumber
-            var room = await _roomService.GetByNumber(roomNumber);
+            var room = await _roomService.GetByNumberAsync(roomNumber);
 
             if (room == null)
             {
@@ -155,23 +188,13 @@ namespace iot_management_api.Services
             entity.Room = room;
 
             //get deviceInfo or create new
-            var dbDeviceInfo = await _deviceInfoService.GetByDeviceInfo(deviceInfo);
+            var dbDeviceInfo = await _deviceInfoService.GetByDeviceInfoAsync(deviceInfo);
             if (dbDeviceInfo == null)
             {
                 var id = await _deviceInfoService.CreateAsync(deviceInfo);
-                //if (id==null)
-                //{
-                //    _logger.LogInformation($"DeviceInfo not found and could not be created");
-                //    return null;
-                //}
-                //dbDeviceInfo = _mapper.Map<DeviceInfo>(deviceInfo);
-                //dbDeviceInfo.Id = id.Value;
                 entity.DeviceInfoId = id;
             }
             else entity.DeviceInfoId = dbDeviceInfo.Id;
-
-
-            //entity.DeviceInfo = dbDeviceInfo;
 
             await _context.Devices.AddAsync(entity);
 
@@ -196,7 +219,7 @@ namespace iot_management_api.Services
             if (entity.Room!=null && entity.Room?.Number!=null
                 && entity.Room?.Number!=dbEntity.Room?.Number)
             {
-                var room = await _roomService.GetByNumber(entity.Room?.Number);
+                var room = await _roomService.GetByNumberAsync(entity.Room?.Number);
                 if (room==null) return false;
                 dbEntity.Room = room;
                 dbEntity.RoomId = room.Id;

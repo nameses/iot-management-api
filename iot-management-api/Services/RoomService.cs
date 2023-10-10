@@ -7,8 +7,8 @@ namespace iot_management_api.Services
 {
     public interface IRoomService
     {
-        Task<Room?> GetByNumber(int? number);
-        Task<Room?> GetById(int? id);
+        Task<Room?> GetByNumberAsync(int? number);
+        Task<Room?> GetByIdAsync(int? id);
         Task<int?> CreateAsync(Room entity);
         Task<bool> UpdateAsync(int id, Room entity);
         Task<bool> DeleteAsync(int id);
@@ -27,7 +27,7 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
-        public async Task<Room?> GetByNumber(int? number)
+        public async Task<Room?> GetByNumberAsync(int? number)
         {
             var entity = await _context.Rooms
                 .AsSplitQuery()
@@ -43,7 +43,7 @@ namespace iot_management_api.Services
             return entity;
         }
 
-        public async Task<Room?> GetById(int? id)
+        public async Task<Room?> GetByIdAsync(int? id)
         {
             if (id==null)
             {

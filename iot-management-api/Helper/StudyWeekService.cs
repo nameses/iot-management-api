@@ -22,13 +22,15 @@ namespace iot_management_api.Helper
 
             //find out current week enum
             WeekEnum? currentWeek = null;
-            if (((now-startDate).Days/7)%2==0) currentWeek = WeekEnum.First;
+            if (((now-startDate).Days/7)%2==0)
+                currentWeek = WeekEnum.First;
             else currentWeek = WeekEnum.Second;
 
             //make now point to monday of first week
-            if (currentWeek==WeekEnum.Second) now = now.AddDays(-7);
+            if (currentWeek==WeekEnum.Second)
+                now = now.AddDays(-7);
 
-            return new DateOnly(now.Year, now.Month, now.Day);
+            return DateOnly.FromDateTime(DateTime.Now);
         }
 
         public WeekEnum GetCurrentWeek()

@@ -30,6 +30,7 @@ namespace iot_management_api.Helper
                 {
                     new Claim("id", userId.ToString()),
                     new Claim("email", email.ToString()),
+                    new Claim(ClaimTypes.Role, userRole.ToString()),
                     new Claim("role", userRole.ToString())
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),

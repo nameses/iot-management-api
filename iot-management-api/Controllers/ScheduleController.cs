@@ -38,7 +38,7 @@ namespace iot_management_api.Controllers
             var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
             var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
 
-            var scheduleDict = await _scheduleService.GetFull(userRole, userId);
+            var scheduleDict = await _scheduleService.GetFullAsync(userRole, userId);
 
             if (scheduleDict==null)
                 return NotFound();
