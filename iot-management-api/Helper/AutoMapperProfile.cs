@@ -23,8 +23,8 @@ namespace iot_management_api.Helper
 
             CreateMap<User, UserModel>();
 
-            CreateMap<Group, GroupModel>()
-                .ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.Students));
+            CreateMap<Group, GroupModel>();
+            //.ForMember(dest => dest.Students, opt => opt.MapFrom(src => src.Students));
             //CreateMap<GroupReq, Group>();
 
             CreateMap<Room, RoomModel>();
@@ -59,6 +59,9 @@ namespace iot_management_api.Helper
                 .ForPath(dest => dest.StartTime, opt => opt.MapFrom(src => src.DayMapping!.StartTime))
                 .ForPath(dest => dest.EndTime, opt => opt.MapFrom(src => src.DayMapping!.EndTime))
                 .ForPath(dest => dest.SubjectNumber, opt => opt.MapFrom(src => src.DayMapping!.SubjectNumber));
+
+
+            CreateMap<DayMapping, DayMappingModel>();
 
         }
     }

@@ -35,7 +35,8 @@ builder.Services.Configure<AzureFileLoggerOptions>(options =>
 });
 
 //controllers
-builder.Services.AddControllers().AddJsonOptions(options =>
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -44,6 +45,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 //services
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IDayMappingService, DayMappingService>();
 builder.Services.AddScoped<IDeviceInfoService, DeviceInfoService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IGroupService, GroupService>();
@@ -101,8 +103,6 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
-
-builder.Services.AddControllers();
 
 var app = builder.Build();
 

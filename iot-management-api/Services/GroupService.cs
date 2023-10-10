@@ -2,11 +2,13 @@
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace iot_management_api.Services
 {
     public interface IGroupService
     {
+        Task<IEnumerable<Group>?> GetAllAsync();
         Task<Group?> GetByGroupCodeAsync(string? groupCode);
         Task<Group?> GetByIdAsync(int? id);
         Task<int?> CreateAsync(Group entity);
@@ -26,6 +28,15 @@ namespace iot_management_api.Services
             _context=context;
             _mapper=mapper;
             _logger=logger;
+        }
+        public async Task<IEnumerable<Group>?> GetAllAsync()
+        {
+            var entities = await _context.Groups.ToListAsync();
+
+            if (entities.IsNullOrEmpty())
+                return null;
+
+            return entities;
         }
         public async Task<Group?> GetByGroupCodeAsync(string? groupCode)
         {

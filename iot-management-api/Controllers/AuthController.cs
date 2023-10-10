@@ -4,6 +4,7 @@ using iot_management_api.Entities.common;
 using iot_management_api.Helper;
 using iot_management_api.Models;
 using iot_management_api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace iot_management_api.Controllers
@@ -28,6 +29,30 @@ namespace iot_management_api.Controllers
             _logger=logger;
             _jwtGenerator=jwtGenerator;
             _mapper=mapper;
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+            var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
+
+            if (userRole==UserRole.Student)
+            {
+                var user = await _studentService.GetByIdAsync(userId);
+
+                return Ok(_mapper.Map<StudentModel>(user));
+            }
+            if (userRole==UserRole.Student)
+            {
+                var user = await _teacherService.GetByIdAsync(userId);
+
+                return Ok(_mapper.Map<TeacherModel>(user));
+            }
+
+            return BadRequest();
         }
 
         [HttpPost]
