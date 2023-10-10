@@ -45,7 +45,7 @@ namespace iot_management_api.Controllers
 
                 return Ok(_mapper.Map<StudentModel>(user));
             }
-            if (userRole==UserRole.Student)
+            if (userRole==UserRole.Teacher)
             {
                 var user = await _teacherService.GetByIdAsync(userId);
 
@@ -116,18 +116,14 @@ namespace iot_management_api.Controllers
 
             //token gen
             var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Student);
-            HttpContext.Response.Cookies.Append("token", token,
-                new CookieOptions()
-                {
-                    Expires = DateTime.Now.AddDays(1),
-                    HttpOnly = true,
-                    Secure = true,
-                    IsEssential = true,
-                    SameSite = SameSiteMode.None
-                });
+            HttpContext.Response.Cookies.Append("token", token);
 
             //response
-            return Ok(_mapper.Map<StudentModel>(user));
+            return Ok(new
+            {
+                user = _mapper.Map<StudentModel>(user),
+                token
+            });
         }
 
         [HttpPost]
@@ -152,21 +148,19 @@ namespace iot_management_api.Controllers
 
             //token gen
             var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Teacher);
-            HttpContext.Response.Cookies.Append("token", token,
-                new CookieOptions()
-                {
-                    Expires = DateTime.Now.AddDays(1),
-                    HttpOnly = true,
-                    Secure = true,
-                    IsEssential = true,
-                    SameSite = SameSiteMode.None
-                });
+            HttpContext.Response.Cookies.Append("token", token);
 
             //response
-            return Ok(_mapper.Map<TeacherModel>(user));
+            return Ok(new
+            {
+                user = _mapper.Map<TeacherModel>(user),
+                token = token
+            });
+
         }
 
         [HttpGet]
+        [Authorize]
         [Route("logout")]
         public async Task<IActionResult> Logout()
         {
