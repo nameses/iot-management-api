@@ -116,7 +116,7 @@ namespace iot_management_api.Controllers
 
             //token gen
             var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Student);
-            HttpContext.Response.Cookies.Append("token", token);
+            //HttpContext.Response.Cookies.Append("token", token);
 
             //response
             return Ok(new
@@ -148,7 +148,7 @@ namespace iot_management_api.Controllers
 
             //token gen
             var token = _jwtGenerator.GenerateToken(user.Id, user.Email, UserRole.Teacher);
-            HttpContext.Response.Cookies.Append("token", token);
+            //HttpContext.Response.Cookies.Append("token", token);
 
             //response
             return Ok(new
@@ -164,7 +164,7 @@ namespace iot_management_api.Controllers
         [Route("logout")]
         public async Task<IActionResult> Logout()
         {
-            HttpContext.Response.Cookies.Delete("token");
+            //HttpContext.Response.Cookies.Delete("token");
             return Ok();
         }
 
