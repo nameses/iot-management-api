@@ -6,7 +6,7 @@ namespace iot_management_api.Services
 {
     public interface IBookingService
     {
-        Task<bool> BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId);
+        Task BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId);
     }
     public class BookingService : IBookingService
     {
@@ -25,7 +25,7 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
-        public async Task<bool> BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId)
+        public async Task BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId)
         {
             var booking = new Booking()
             {
@@ -36,13 +36,9 @@ namespace iot_management_api.Services
                 DeviceId = deviceId
             };
 
-            var res = await _deviceService.CheckIfDeviceAvailableAsync(deviceId, date, scheduleId);
-            if (!res) return false;
-
             await _context.Bookings.AddAsync(booking);
 
             await _context.SaveChangesAsync();
-            return true;
         }
 
     }

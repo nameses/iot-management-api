@@ -10,14 +10,17 @@ namespace iot_management_api.Controllers
     public class BookingController : Controller
     {
         private readonly IBookingService _bookingService;
+        private readonly IDeviceService _deviceService;
         private readonly IMapper _mapper;
         private readonly ILogger<BookingController> _logger;
 
         public BookingController(IBookingService bookingService,
+            IDeviceService deviceService,
             IMapper mapper,
             ILogger<BookingController> logger)
         {
             _bookingService=bookingService;
+            _deviceService=deviceService;
             _mapper=mapper;
             _logger=logger;
         }
@@ -30,13 +33,13 @@ namespace iot_management_api.Controllers
             if (date<DateOnly.FromDateTime(DateTime.Now))
                 return BadRequest("Date is expired");
 
+            var ifDeviceAvailable = await _deviceService.CheckIfDeviceAvailableAsync(deviceId, date, scheduleId);
+            if (!ifDeviceAvailable)
+                return BadRequest("Device is not available");
+
             var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
 
-            var res = await _bookingService.BookDeviceAsync(deviceId, userId, date, scheduleId);
-
-            if (res==false)
-                return BadRequest();
-
+            await _bookingService.BookDeviceAsync(deviceId, userId, date, scheduleId);
             return Ok();
         }
     }
