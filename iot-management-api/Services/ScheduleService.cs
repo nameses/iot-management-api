@@ -59,7 +59,7 @@ namespace iot_management_api.Services
         {
             var convertedData = new Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>();
 
-            var date = _weekService.GetMondayOfFirstWeek();
+            var mondayFirstWeekDate = _weekService.GetMondayOfFirstWeek();
 
             foreach (var weekEntry in originalData)
             {
@@ -72,8 +72,10 @@ namespace iot_management_api.Services
                 {
                     var schedules = dayEntry.Value;
 
-                    convertedWeekData[new DateOnly(date.Year, date.Month, date.Day)] = schedules;
-                    date = date.AddDays(1);
+                    //var date = new DateOnly(mondayFirstWeekDate.Year, mondayFirstWeekDate.Month, mondayFirstWeekDate.Day);
+                    //date = date.AddDays((int)weekEnum*7+(int)dayEntry.Key);
+                    var date = mondayFirstWeekDate.AddDays((int)weekEnum*7+(int)dayEntry.Key);
+                    convertedWeekData[date] = schedules;
                 }
 
                 convertedData[weekEnum] = convertedWeekData;
