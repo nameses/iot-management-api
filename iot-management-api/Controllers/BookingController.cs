@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using iot_management_api.Models;
 using iot_management_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace iot_management_api.Controllers
 {
@@ -41,6 +43,21 @@ namespace iot_management_api.Controllers
 
             await _bookingService.BookDeviceAsync(deviceId, userId, date, scheduleId);
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("requests")]
+        [Authorize(Policy = "TeacherAccess")]
+        public async Task<IActionResult> ShowStudentsRequests()
+        {
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+
+            var entities = await _bookingService.ShowStudentsRequestsForTeacherAsync(userId);
+
+            if (entities.IsNullOrEmpty())
+                return NotFound();
+
+            return Ok(_mapper.Map<IEnumerable<BookingModel>>(entities));
         }
     }
 }

@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using iot_management_api.Context;
 using iot_management_api.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace iot_management_api.Services
 {
     public interface IBookingService
     {
         Task BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId);
+        Task<IEnumerable<Booking>?> ShowStudentsRequestsForTeacherAsync(int userId);
     }
     public class BookingService : IBookingService
     {
@@ -41,5 +43,23 @@ namespace iot_management_api.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task<IEnumerable<Booking>?> ShowStudentsRequestsForTeacherAsync(int userId)
+        {
+            List<int> subjects = await _context.Subjects
+                .Where(x => x.TeacherId==userId)
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            var bookings = await _context.Bookings
+                .Include(x => x.Schedule)
+                .Include(x => x.Schedule!.Period)
+                .Include(x => x.Schedule!.Period!.DayMapping)
+                .Include(x => x.Device)
+                .Include(x => x.Device!.DeviceInfo)
+                .Where(x => subjects.Contains(x.Schedule!.SubjectId!.Value))
+                .ToListAsync();
+
+            return bookings;
+        }
     }
 }
