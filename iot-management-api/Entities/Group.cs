@@ -12,5 +12,6 @@ namespace iot_management_api.Entities
         public required int Term { get; set; }
         public List<Student> Students { get; set; } = new List<Student>();
         public List<Schedule> Schedules { get; set; } = new List<Schedule>();
+        public List<GroupSchedule> GroupSchedules { get; set; } = new List<GroupSchedule>();
     }
 }

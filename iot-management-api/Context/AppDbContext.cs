@@ -23,8 +23,11 @@ namespace iot_management_api.Context
 
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        private readonly DataSeeder _seeder;
+
+        public AppDbContext(DbContextOptions<AppDbContext> options, DataSeeder seeder) : base(options)
         {
+            _seeder=seeder;
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -55,7 +58,32 @@ namespace iot_management_api.Context
                 .HasForeignKey(b => b.DeviceId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            DataSeeder.SeedData(builder);
+            builder
+                .Entity<Schedule>()
+                .HasMany(c => c.Groups)
+                .WithMany(s => s.Schedules)
+                .UsingEntity<GroupSchedule>(
+                   j => j
+                    .HasOne(pt => pt.Group)
+                    .WithMany(t => t.GroupSchedules)
+                    .HasForeignKey(pt => pt.GroupId),
+                    j => j
+                        .HasOne(pt => pt.Schedule)
+                        .WithMany(p => p.GroupSchedules)
+                        .HasForeignKey(pt => pt.ScheduleId),
+                    j =>
+                    {
+                        j.HasKey(t => new { t.GroupId, t.ScheduleId });
+                        j.ToTable("GroupSchedules");
+                    });
+
+
+            //builder.Entity<Schedule>()
+            //    .HasMany(c => c.Groups)
+            //    .WithMany(s => s.Schedules)
+            //    .UsingEntity(j => j.ToTable("GroupSchedules"));
+
+            _seeder.SeedData(builder);
         }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder builder)
@@ -68,6 +96,7 @@ namespace iot_management_api.Context
             builder.Properties<DateOnly>()
                 .HaveConversion<DateOnlyConverter>();
         }
+        //public DbSet<GroupSchedule> GroupSchedules { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<DayMapping> DayMappings { get; set; }
         public DbSet<Device> Devices { get; set; }
