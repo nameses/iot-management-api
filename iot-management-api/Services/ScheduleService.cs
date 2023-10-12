@@ -46,9 +46,13 @@ namespace iot_management_api.Services
                     weekGroup => weekGroup.Key,
                     weekGroup => weekGroup
                         .GroupBy(x => x.Period.Day)
+                        .OrderBy(m => m.Key)
                         .ToDictionary(
                             dayGroup => dayGroup.Key,
-                            dayGroup => dayGroup.Select(schedule => _mapper.Map<ScheduleModel>(schedule)).ToList()
+                            dayGroup => dayGroup
+                            .Select(schedule => _mapper.Map<ScheduleModel>(schedule))
+                            .OrderBy(scheduleModel => scheduleModel.Period.SubjectNumber)
+                            .ToList()
                         )
                 );
 
