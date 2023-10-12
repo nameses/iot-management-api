@@ -4,11 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace iot_management_api.Helper
 {
-    public static class DataSeeder
+    public class DataSeeder
     {
-        public static void SeedData(ModelBuilder builder)
+        private readonly Encrypter _encrypter;
+
+        public DataSeeder(Encrypter encrypter)
         {
-            builder.Entity<DayMapping>().HasData(
+            _encrypter=encrypter;
+        }
+
+        public void SeedData(ModelBuilder builder)
+        {
+            var dayMappingList = new List<DayMapping>
+            {
                 new DayMapping
                 {
                     Id = 1,
@@ -40,139 +48,34 @@ namespace iot_management_api.Helper
                     StartTime = new TimeOnly(16, 10),
                     EndTime = new TimeOnly(18, 20),
                 }
-            );
+            };
+            builder.Entity<DayMapping>().HasData(dayMappingList);
 
-            builder.Entity<Period>().HasData(
-                new Period
+            var periods = new List<Period>();
+            var year = DateTime.Now.Year;
+            foreach (DayEnum day in Enum.GetValues(typeof(DayEnum)))
+            {
+                foreach (WeekEnum week in Enum.GetValues(typeof(WeekEnum)))
                 {
-                    Id = 1,
-                    Day = DayEnum.Monday,
-                    Week = WeekEnum.First,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 1
-                }, new Period
-                {
-                    Id = 2,
-                    Day = DayEnum.Tuesday,
-                    Week = WeekEnum.First,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 2
-                }, new Period
-                {
-                    Id = 3,
-                    Day = DayEnum.Wednesday,
-                    Week = WeekEnum.First,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 4
-                }, new Period
-                {
-                    Id = 4,
-                    Day = DayEnum.Thursday,
-                    Week = WeekEnum.First,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 3
-                }, new Period
-                {
-                    Id = 5,
-                    Day = DayEnum.Friday,
-                    Week = WeekEnum.First,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 5
-                }, new Period
-                {
-                    Id = 6,
-                    Day = DayEnum.Saturday,
-                    Week = WeekEnum.First,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 1
-                }, new Period
-                {
-                    Id = 7,
-                    Day = DayEnum.Monday,
-                    Week = WeekEnum.Second,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 1
-                }, new Period
-                {
-                    Id = 8,
-                    Day = DayEnum.Tuesday,
-                    Week = WeekEnum.Second,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 2
-                }, new Period
-                {
-                    Id = 9,
-                    Day = DayEnum.Wednesday,
-                    Week = WeekEnum.Second,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 1
-                }, new Period
-                {
-                    Id = 10,
-                    Day = DayEnum.Thursday,
-                    Week = WeekEnum.Second,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 4
-                }, new Period
-                {
-                    Id = 11,
-                    Day = DayEnum.Friday,
-                    Week = WeekEnum.Second,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 3
-                }, new Period
-                {
-                    Id = 12,
-                    Day = DayEnum.Saturday,
-                    Week = WeekEnum.Second,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 2
-                }, new Period
-                {
-                    Id = 13,
-                    Day = DayEnum.Tuesday,
-                    Week = WeekEnum.First,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 5
-                }, new Period
-                {
-                    Id = 14,
-                    Day = DayEnum.Tuesday,
-                    Week = WeekEnum.First,
-                    Semester = SemesterEnum.First,
-                    Year = DateTime.Now.Year,
-                    Lable = "",
-                    DayMappingId = 4
+                    for (int dayMappingId = 1; dayMappingId <= 5; dayMappingId++)
+                    {
+                        periods.Add(new Period
+                        {
+                            Id = periods.Count + 1,
+                            Day = day,
+                            Week = week,
+                            Semester = SemesterEnum.First,
+                            Year = year,
+                            Lable = "",
+                            DayMappingId = dayMappingId
+                        });
+                    }
                 }
-            );
+            }
+            builder.Entity<Period>().HasData(periods);
 
-            builder.Entity<Group>().HasData(
+            var groupList = new List<Group>
+            {
                 new Group
                 {
                     Id = 1,
@@ -204,9 +107,11 @@ namespace iot_management_api.Helper
                     GroupCode = "RT-45",
                     Term = 1
                 }
-            );
+            };
+            builder.Entity<Group>().HasData(groupList);
 
-            builder.Entity<Room>().HasData(
+            var roomList = new List<Room>
+            {
                 new Room()
                 {
                     Id = 1,
@@ -220,7 +125,7 @@ namespace iot_management_api.Helper
                 }, new Room()
                 {
                     Id = 3,
-                    Number = 202,
+                    Number = 201,
                     Floor = 2
                 }, new Room()
                 {
@@ -231,11 +136,38 @@ namespace iot_management_api.Helper
                 {
                     Id = 5,
                     Number = 401,
-                    Floor = 4
+                    Floor = 1
+                }, new Room()
+                {
+                    Id = 6,
+                    Number = 103,
+                    Floor = 1
+                }, new Room()
+                {
+                    Id = 7,
+                    Number = 104,
+                    Floor = 1
+                }, new Room()
+                {
+                    Id = 8,
+                    Number = 202,
+                    Floor = 2
+                }, new Room()
+                {
+                    Id = 9,
+                    Number = 203,
+                    Floor = 2
+                }, new Room()
+                {
+                    Id = 10,
+                    Number = 204,
+                    Floor = 2
                 }
-            );
+            };
+            builder.Entity<Room>().HasData(roomList);
 
-            builder.Entity<DeviceInfo>().HasData(
+            var deviceInfoList = new List<DeviceInfo>
+            {
                 new DeviceInfo()
                 {
                     Id = 1,
@@ -288,8 +220,11 @@ namespace iot_management_api.Helper
                     Model = "VT-66",
                     Description = ""
                 }
-            );
-            builder.Entity<Device>().HasData(
+            };
+            builder.Entity<DeviceInfo>().HasData(deviceInfoList);
+
+            var deviceList = new List<Device>
+            {
                 new Device
                 {
                     Id = 1,
@@ -325,15 +260,277 @@ namespace iot_management_api.Helper
                     Id = 6,
                     Amount = 5,
                     DeviceInfoId = 6,
-                    RoomId = 2
+                    RoomId = 6
                 }, new Device
                 {
                     Id = 7,
                     Amount = 9,
                     DeviceInfoId = 5,
-                    RoomId = 2
+                    RoomId = 7
+                }, new Device
+                {
+                    Id = 8,
+                    Amount = 6,
+                    DeviceInfoId = 2,
+                    RoomId = 8
+                }, new Device
+                {
+                    Id = 9,
+                    Amount = 11,
+                    DeviceInfoId = 1,
+                    RoomId = 9
+                }, new Device
+                {
+                    Id = 10,
+                    Amount = 9,
+                    DeviceInfoId = 2,
+                    RoomId = 8
+                }, new Device
+                {
+                    Id = 11,
+                    Amount = 15,
+                    DeviceInfoId = 3,
+                    RoomId = 7
+                }, new Device
+                {
+                    Id = 12,
+                    Amount = 12,
+                    DeviceInfoId = 4,
+                    RoomId = 6
                 }
-            );
+            };
+            builder.Entity<Device>().HasData(deviceList);
+
+            var teacherList = new List<Teacher>
+            {
+                new Teacher
+                {
+                    Id = 1,
+                    Name = "Edvin",
+                    Surname = "Brown",
+                    Email = "edvin.brown@gmail.com",
+                    Password = _encrypter.Encrypt("edvin.brown@gmail.com"),
+                    CreatedAt = DateTime.Now
+                }, new Teacher
+                {
+                    Id = 2,
+                    Name = "Kilden",
+                    Surname = "Egregor",
+                    Email = "kildren.egregor@gmail.com",
+                    Password = _encrypter.Encrypt("kildren.egregor@gmail.com"),
+                    CreatedAt = DateTime.Now
+                }, new Teacher
+                {
+                    Id = 3,
+                    Name = "Gregor",
+                    Surname = "Blue",
+                    Email = "gregor.blue@gmail.com",
+                    Password = _encrypter.Encrypt("gregor.blue@gmail.com"),
+                    CreatedAt = DateTime.Now
+                }, new Teacher
+                {
+                    Id = 4,
+                    Name = "Mike",
+                    Surname = "Peterson",
+                    Email = "mike.peterson@gmail.com",
+                    Password = _encrypter.Encrypt("mike.peterson@gmail.co"),
+                    CreatedAt = DateTime.Now
+                }, new Teacher
+                {
+                    Id = 5,
+                    Name = "Peter",
+                    Surname = "Lomakin",
+                    Email = "peter.lomakin@gmail.com",
+                    Password = _encrypter.Encrypt("peter.lomakin@gmail.com"),
+                    CreatedAt = DateTime.Now
+                }, new Teacher
+                {
+                    Id = 6,
+                    Name = "Oleksandr",
+                    Surname = "Dodokin",
+                    Email = "oleksandr.dodokin@gmail.com",
+                    Password = _encrypter.Encrypt("oleksandr.dodokin@gmail.com"),
+                    CreatedAt = DateTime.Now
+                }
+            };
+            builder.Entity<Teacher>().HasData(teacherList);
+
+            var subjectList = new List<Subject>
+            {
+                new Subject
+                {
+                    Id=1,
+                    TeacherId=1,
+                    Name = "Introduction to Physics",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=2,
+                    TeacherId=1,
+                    Name = "Introduction to Physics",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=3,
+                    TeacherId=2,
+                    Name = "Functional programming",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=4,
+                    TeacherId=2,
+                    Name = "Functional programming",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=5,
+                    TeacherId=3,
+                    Name = "Introduction to Computer Science",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=6,
+                    TeacherId=3,
+                    Name = "Introduction to Computer Science",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=7,
+                    TeacherId=4,
+                    Name = "Algorithms and Data Structures",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=8,
+                    TeacherId=4,
+                    Name = "Algorithms and Data Structures",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=9,
+                    TeacherId=5,
+                    Name = "Advanced Algorithms",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=10,
+                    TeacherId=5,
+                    Name = "Advanced Algorithms",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=11,
+                    TeacherId=1,
+                    Name = "Advanced Physics",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=12,
+                    TeacherId=1,
+                    Name = "Advanced Physics",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=13,
+                    TeacherId=2,
+                    Name = "Advanced Functional programming",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=14,
+                    TeacherId=2,
+                    Name = "Advanced Functional programming",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=15,
+                    TeacherId=3,
+                    Name = "Computer Science",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=16,
+                    TeacherId=3,
+                    Name = "Computer Science",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=17,
+                    TeacherId=4,
+                    Name = "Data Science",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=18,
+                    TeacherId=4,
+                    Name = "Data Science",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=19,
+                    TeacherId=5,
+                    Name = "SQL Data Bases",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=20,
+                    TeacherId=5,
+                    Name = "SQL Data Bases",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=21,
+                    TeacherId=6,
+                    Name = "Async Programming",
+                    Type= SubjectType.Lecture
+                }, new Subject
+                {
+                    Id=22,
+                    TeacherId=6,
+                    Name = "Async Programming",
+                    Type= SubjectType.Practice
+                }, new Subject
+                {
+                    Id=23,
+                    TeacherId=6,
+                    Name = "English. Teachical skills",
+                    Type= SubjectType.Practice
+                }
+            };
+            builder.Entity<Subject>().HasData(subjectList);
+
+            var groupSchedule = new List<GroupSchedule>();
+            var schedules = new List<Schedule>();
+            var random = new Random();
+            int i = 1;
+            foreach (var group in groupList)
+            {
+                var numToCreate = random.Next(20, 26);
+
+                var groupPeriods = periods.OrderBy(p => random.Next())
+                    .Take(numToCreate)
+                    .ToList();
+
+                //create rnd subject list
+                var sList = subjectList.OrderBy(p => random.Next())
+                    .Take(numToCreate)
+                    .ToList();
+
+                foreach ((var s, var p) in sList.Zip(groupPeriods, Tuple.Create))
+                {
+                    groupSchedule.Add(new GroupSchedule { Id=i, GroupId=group.Id, ScheduleId=i });
+                    schedules.Add(new Schedule
+                    {
+                        Id = i++,
+                        SubjectId = s.Id,
+                        PeriodId = p.Id,
+                        RoomId = roomList[random.Next(roomList.Count)].Id
+                    });
+                }
+            }
+            builder.Entity<Schedule>().HasData(schedules);
+            builder.Entity<GroupSchedule>().HasData(groupSchedule);
+
         }
     }
 }
