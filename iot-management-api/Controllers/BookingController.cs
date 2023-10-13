@@ -13,16 +13,19 @@ namespace iot_management_api.Controllers
     {
         private readonly IBookingService _bookingService;
         private readonly IDeviceService _deviceService;
+        private readonly IScheduleService _scheduleService;
         private readonly IMapper _mapper;
         private readonly ILogger<BookingController> _logger;
 
         public BookingController(IBookingService bookingService,
             IDeviceService deviceService,
+            IScheduleService scheduleService,
             IMapper mapper,
             ILogger<BookingController> logger)
         {
             _bookingService=bookingService;
             _deviceService=deviceService;
+            _scheduleService=scheduleService;
             _mapper=mapper;
             _logger=logger;
         }
@@ -32,14 +35,27 @@ namespace iot_management_api.Controllers
         [Authorize(Policy = "StudentAccess")]
         public async Task<IActionResult> BookDevice([FromRoute] int deviceId, [FromQuery] DateOnly date, int scheduleId)
         {
-            if (date<DateOnly.FromDateTime(DateTime.Now))
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+            //check if date expired
+            if (date < DateOnly.FromDateTime(DateTime.Now))
                 return BadRequest("Date is expired");
 
+            //check if student is assigned to this schedule, if this date is the date of schedule
+            var ifDateIsScheduleDate = await _scheduleService.CheckDateSchedule(date, scheduleId);
+            if (!ifDateIsScheduleDate)
+                return BadRequest("Date/Schedule mismatch");
+
+            //check if student is assigned to this schedule, if this date is the date of schedule
+            var ifStudentAssignedToSchedule = await _scheduleService.CheckStudentAssignmentToSchedule(userId, scheduleId);
+            if (!ifStudentAssignedToSchedule)
+                return BadRequest("Current student is not assigned to this schedule");
+
+            //check if device available for date/schedule
             var ifDeviceAvailable = await _deviceService.CheckIfDeviceAvailableAsync(deviceId, date, scheduleId);
             if (!ifDeviceAvailable)
                 return BadRequest("Device is not available");
 
-            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+
 
             await _bookingService.BookDeviceAsync(deviceId, userId, date, scheduleId);
             return Ok();
