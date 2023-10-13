@@ -11,6 +11,8 @@ namespace iot_management_api.Services
     public interface IScheduleService
     {
         Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFullAsync(UserRole userRole, int userId);
+        Task<bool> CheckUserAssignmentToSchedule(UserRole userRole, int userId, int scheduleId);
+        Task<bool> CheckDateSchedule(DateOnly date, int scheduleId);
     }
     public class ScheduleService : IScheduleService
     {
@@ -41,15 +43,41 @@ namespace iot_management_api.Services
                 return null;
 
             var dict = entities
-                .GroupBy(x => x.Period.Week)
+                .GroupBy(x => x.Period!.Week)
                 .ToDictionary(
                     weekGroup => weekGroup.Key,
                     weekGroup => weekGroup
-                        .GroupBy(x => x.Period.Day)
+                        .GroupBy(x => x.Period!.Day)
+                        //.OrderBy(m => m.Key)
                         .ToDictionary(
                             dayGroup => dayGroup.Key,
-                            dayGroup => dayGroup.Select(schedule => _mapper.Map<ScheduleModel>(schedule)).ToList()
+                            dayGroup => dayGroup
+                            .Select(schedule => _mapper.Map<ScheduleModel>(schedule))
+                            .OrderBy(scheduleModel => scheduleModel.Period.SubjectNumber)
+                            .ToList()
                         )
+                );
+
+            var allDayEnums = Enum.GetValues(typeof(DayEnum)).Cast<DayEnum>().ToArray();
+
+            foreach (var weekGroup in dict)
+            {
+                var list = new List<DayEnum>();
+                foreach (var dayEnum in allDayEnums)
+                {
+                    if (!weekGroup.Value.ContainsKey(dayEnum))
+                        list.Add(dayEnum);
+                }
+                foreach (var elem in list)
+                    dict[weekGroup.Key].Add(elem, new List<ScheduleModel>());
+            }
+
+            dict = dict
+                .ToDictionary(
+                    outer => outer.Key,
+                    outer => outer.Value
+                        .OrderBy(inner => inner.Key)
+                        .ToDictionary(inner => inner.Key, inner => inner.Value)
                 );
 
             return ConvertDateEnumToDateOnly(dict);
@@ -59,7 +87,7 @@ namespace iot_management_api.Services
         {
             var convertedData = new Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>();
 
-            var date = _weekService.GetMondayOfFirstWeek();
+            var mondayFirstWeekDate = _weekService.GetMondayOfFirstWeek(DateOnly.FromDateTime(DateTime.Now));
 
             foreach (var weekEntry in originalData)
             {
@@ -72,8 +100,10 @@ namespace iot_management_api.Services
                 {
                     var schedules = dayEntry.Value;
 
-                    convertedWeekData[new DateOnly(date.Year, date.Month, date.Day)] = schedules;
-                    date = date.AddDays(1);
+                    //var date = new DateOnly(mondayFirstWeekDate.Year, mondayFirstWeekDate.Month, mondayFirstWeekDate.Day);
+                    //date = date.AddDays((int)weekEnum*7+(int)dayEntry.Key);
+                    var date = mondayFirstWeekDate.AddDays((int)weekEnum*7+(int)dayEntry.Key);
+                    convertedWeekData[date] = schedules;
                 }
 
                 convertedData[weekEnum] = convertedWeekData;
@@ -92,13 +122,13 @@ namespace iot_management_api.Services
             return await _context.Schedules
                 .Include(x => x.Groups)
                 .Include(x => x.Period)
-                .Include(x => x.Period.DayMapping)
+                .Include(x => x.Period!.DayMapping)
                 .Include(x => x.Subject)
-                .Include(x => x.Subject.Teacher)
+                .Include(x => x.Subject!.Teacher)
                 .Include(x => x.Room)
                 .AsSplitQuery()
                 .Where(x => x.Groups.Contains(group)
-                    && x.Period.Year==DateTime.Now.Year
+                    && x.Period!.Year==DateTime.Now.Year
                     && x.Period.Semester == GetCurrentSemester())
                 .ToListAsync();
 
@@ -116,12 +146,12 @@ namespace iot_management_api.Services
             return await _context.Schedules
                 .Include(x => x.Groups)
                 .Include(x => x.Period)
-                .Include(x => x.Period.DayMapping)
+                .Include(x => x.Period!.DayMapping)
                 .Include(x => x.Subject)
                 .Include(x => x.Room)
                 .AsSplitQuery()
                 .Where(x => x.SubjectId==subject.Id
-                    && x.Period.Year==DateTime.Now.Year
+                    && x.Period!.Year==DateTime.Now.Year
                     && x.Period.Semester == GetCurrentSemester())
                 .ToListAsync();
         }
@@ -136,6 +166,49 @@ namespace iot_management_api.Services
             if (currentMonth>=firstMonth || currentMonth<secondMonth)
                 return SemesterEnum.First;
             else return SemesterEnum.Second;
+        }
+        public async Task<bool> CheckUserAssignmentToSchedule(UserRole userRole, int userId, int scheduleId)
+        {
+            if (userRole == UserRole.Student)
+            {
+                var user = _context.Students.FirstOrDefault(x => x.Id==userId);
+                if (user==null) return false;
+
+                var schedule = await _context.Schedules
+                    .Include(x => x.GroupSchedules)
+                    .Where(x => x.GroupSchedules.Contains(new GroupSchedule { GroupId=user.GroupId, ScheduleId = x.Id }))
+                    .FirstOrDefaultAsync(x => x.Id == scheduleId);
+
+                if (schedule!=null) return true;
+            }
+            else if (userRole == UserRole.Teacher)
+            {
+                var user = _context.Teachers.Include(x => x.Subjects).FirstOrDefault(x => x.Id==userId);
+                if (user==null) return false;
+
+                var schedule = await _context.Schedules
+                    .Include(x => x.Subject)
+                    .Where(x => user.Subjects.Select(x => (int?)x.Id).Contains(x.SubjectId))
+                    .FirstOrDefaultAsync(x => x.Id == scheduleId);
+
+                if (schedule!=null) return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> CheckDateSchedule(DateOnly date, int scheduleId)
+        {
+            (WeekEnum, DayEnum) wd = _weekService.GetWeekDateEnums(date);
+
+            var schedule = await _context.Schedules
+                .Include(x => x.Period)
+                .FirstOrDefaultAsync(x => x.Id == scheduleId);
+
+            if (schedule !=null && schedule!.Period != null
+                && schedule.Period.Week == wd.Item1
+                && schedule.Period.Day==wd.Item2)
+                return true;
+            return false;
         }
     }
 }

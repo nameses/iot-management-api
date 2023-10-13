@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using iot_management_api.Context;
 using iot_management_api.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace iot_management_api.Services
 {
     public interface IBookingService
     {
-        Task<bool> BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId);
+        Task BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId);
+        Task<IEnumerable<Booking>?> ShowStudentsRequestsForTeacherAsync(int userId);
     }
     public class BookingService : IBookingService
     {
@@ -25,7 +27,7 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
-        public async Task<bool> BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId)
+        public async Task BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId)
         {
             var booking = new Booking()
             {
@@ -36,14 +38,28 @@ namespace iot_management_api.Services
                 DeviceId = deviceId
             };
 
-            var res = await _deviceService.CheckIfDeviceAvailableAsync(deviceId, date, scheduleId);
-            if (!res) return false;
-
             await _context.Bookings.AddAsync(booking);
 
             await _context.SaveChangesAsync();
-            return true;
         }
 
+        public async Task<IEnumerable<Booking>?> ShowStudentsRequestsForTeacherAsync(int userId)
+        {
+            List<int> subjects = await _context.Subjects
+                .Where(x => x.TeacherId==userId)
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            var bookings = await _context.Bookings
+                .Include(x => x.Schedule)
+                .Include(x => x.Schedule!.Period)
+                .Include(x => x.Schedule!.Period!.DayMapping)
+                .Include(x => x.Device)
+                .Include(x => x.Device!.DeviceInfo)
+                .Where(x => subjects.Contains(x.Schedule!.SubjectId!.Value))
+                .ToListAsync();
+
+            return bookings;
+        }
     }
 }

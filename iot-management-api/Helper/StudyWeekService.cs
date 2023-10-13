@@ -4,33 +4,32 @@ namespace iot_management_api.Helper
 {
     public class StudyWeekService
     {
-        public DateOnly GetMondayOfFirstWeek()
+        public DateOnly GetMondayOfFirstWeek(DateOnly date)
         {
-            var startYear = DateTime.Now.Year;
-            if (DateTime.Now.Month<9)
+            var startYear = date.Year;
+            if (date.Month<9)
                 startYear--;
             var startDate = GetFirstMondayOfSeptember(startYear);
 
-            var now = DateTime.Now;
-            //make now point to monday of this week
-            if (now.DayOfWeek!=DayOfWeek.Monday)
+            //make date point to monday of this week
+            if (date.DayOfWeek!=DayOfWeek.Monday)
             {
-                now = now.AddDays(-7);
-                while (now.DayOfWeek != DayOfWeek.Monday)
-                    now = now.AddDays(1);
+                date = date.AddDays(-7);
+                while (date.DayOfWeek != DayOfWeek.Monday)
+                    date = date.AddDays(1);
             }
 
             //find out current week enum
             WeekEnum? currentWeek = null;
-            if (((now-startDate).Days/7)%2==0)
+            if (((date.ToDateTime(TimeOnly.MinValue)-startDate).Days/7)%2==0)
                 currentWeek = WeekEnum.First;
             else currentWeek = WeekEnum.Second;
 
-            //make now point to monday of first week
+            //make date point to monday of first week
             if (currentWeek==WeekEnum.Second)
-                now = now.AddDays(-7);
+                date = date.AddDays(-7);
 
-            return DateOnly.FromDateTime(DateTime.Now);
+            return date;
         }
 
         public WeekEnum GetCurrentWeek()
@@ -62,6 +61,28 @@ namespace iot_management_api.Helper
                 septemberFirst = septemberFirst.AddDays(1);
 
             return septemberFirst;
+        }
+
+        public (WeekEnum, DayEnum) GetWeekDateEnums(DateOnly date)
+        {
+            var firstMonday = GetMondayOfFirstWeek(date);
+            WeekEnum currentWeek = WeekEnum.First;
+            DayEnum currentDay = DayEnum.Monday;
+            int days = ((date.ToDateTime(TimeOnly.MinValue)-firstMonday.ToDateTime(TimeOnly.MinValue))).Days;
+
+            if (days/7==1)
+            {
+                days-=7;
+                currentWeek++;// = WeekEnum.Second;
+            }
+            if (days>7) throw new Exception("Exception during convertion from date to week and date enums");
+            while (days>0)
+            {
+                currentDay++;
+                days--;
+            }
+
+            return (currentWeek, currentDay);
         }
     }
 }

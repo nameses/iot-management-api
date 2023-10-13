@@ -42,7 +42,7 @@ namespace iot_management_api.Services
             //get schedule entity + room
             var schedule = await _context.Schedules
                 .Include(x => x.Room)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(x => x.Id==scheduleId);
             if (schedule == null) return false;
 
             //get device from room
@@ -78,11 +78,11 @@ namespace iot_management_api.Services
             //get schedule entity + room
             var schedule = await _context.Schedules
                 .Include(x => x.Room)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(x => x.Id == scheduleId);
             if (schedule == null) return null;
 
             //get all devices from room
-            var devices = await _context.Devices
+            IEnumerable<Device> devices = await _context.Devices
                 .Include(x => x.DeviceInfo)
                 .Where(x => x.RoomId==schedule.RoomId)
                 .ToListAsync();
@@ -105,12 +105,10 @@ namespace iot_management_api.Services
                 if (deviceBookingCounts.TryGetValue(device.Id, out int bookedCount))
                 {
                     device.Amount -= bookedCount;
-
-                    //delete or set amount to zero?
-                    if (device.Amount<=0) //device.Amount = 0;
-                        devices.Remove(device);
                 }
             }
+
+            devices = devices.Where(x => x.Amount>0);
 
             return devices;
         }
