@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using iot_management_api.Entities.common;
 using iot_management_api.Models;
 using iot_management_api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -35,20 +36,21 @@ namespace iot_management_api.Controllers
         [Authorize(Policy = "StudentAccess")]
         public async Task<IActionResult> BookDevice([FromRoute] int deviceId, [FromQuery] DateOnly date, int scheduleId)
         {
+            var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
             var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
             //check if date expired
             if (date < DateOnly.FromDateTime(DateTime.Now))
                 return BadRequest("Date is expired");
 
-            //check if student is assigned to this schedule, if this date is the date of schedule
+            //check if this date is the date of schedule
             var ifDateIsScheduleDate = await _scheduleService.CheckDateSchedule(date, scheduleId);
             if (!ifDateIsScheduleDate)
                 return BadRequest("Date/Schedule mismatch");
 
-            //check if student is assigned to this schedule, if this date is the date of schedule
-            var ifStudentAssignedToSchedule = await _scheduleService.CheckStudentAssignmentToSchedule(userId, scheduleId);
-            if (!ifStudentAssignedToSchedule)
-                return BadRequest("Current student is not assigned to this schedule");
+            //check if User is assigned to this schedule
+            var ifUserAssignedToSchedule = await _scheduleService.CheckUserAssignmentToSchedule(userRole, userId, scheduleId);
+            if (!ifUserAssignedToSchedule)
+                return BadRequest("Current user is not assigned to this schedule");
 
             //check if device available for date/schedule
             var ifDeviceAvailable = await _deviceService.CheckIfDeviceAvailableAsync(deviceId, date, scheduleId);

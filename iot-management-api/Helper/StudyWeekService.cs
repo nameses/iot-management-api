@@ -4,14 +4,13 @@ namespace iot_management_api.Helper
 {
     public class StudyWeekService
     {
-        public DateOnly GetMondayOfFirstWeek()
+        public DateOnly GetMondayOfFirstWeek(DateOnly date)
         {
-            var startYear = DateTime.Now.Year;
-            if (DateTime.Now.Month<9)
+            var startYear = date.Year;
+            if (date.Month<9)
                 startYear--;
             var startDate = GetFirstMondayOfSeptember(startYear);
 
-            var date = DateTime.Now;
             //make date point to monday of this week
             if (date.DayOfWeek!=DayOfWeek.Monday)
             {
@@ -22,7 +21,7 @@ namespace iot_management_api.Helper
 
             //find out current week enum
             WeekEnum? currentWeek = null;
-            if (((date-startDate).Days/7)%2==0)
+            if (((date.ToDateTime(TimeOnly.MinValue)-startDate).Days/7)%2==0)
                 currentWeek = WeekEnum.First;
             else currentWeek = WeekEnum.Second;
 
@@ -30,7 +29,7 @@ namespace iot_management_api.Helper
             if (currentWeek==WeekEnum.Second)
                 date = date.AddDays(-7);
 
-            return DateOnly.FromDateTime(date);
+            return date;
         }
 
         public WeekEnum GetCurrentWeek()
@@ -66,7 +65,7 @@ namespace iot_management_api.Helper
 
         public (WeekEnum, DayEnum) GetWeekDateEnums(DateOnly date)
         {
-            var firstMonday = GetMondayOfFirstWeek();
+            var firstMonday = GetMondayOfFirstWeek(date);
             WeekEnum currentWeek = WeekEnum.First;
             DayEnum currentDay = DayEnum.Monday;
             int days = ((date.ToDateTime(TimeOnly.MinValue)-firstMonday.ToDateTime(TimeOnly.MinValue))).Days;

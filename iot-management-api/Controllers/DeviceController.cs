@@ -12,14 +12,17 @@ namespace iot_management_api.Controllers
     public class DeviceController : Controller
     {
         private readonly IDeviceService _deviceService;
+        private readonly IScheduleService _scheduleService;
         private readonly IMapper _mapper;
         private readonly ILogger<DeviceController> _logger;
 
         public DeviceController(IDeviceService deviceService,
+            IScheduleService scheduleService,
             IMapper mapper,
             ILogger<DeviceController> logger)
         {
             _deviceService=deviceService;
+            _scheduleService=scheduleService;
             _mapper=mapper;
             _logger=logger;
         }
@@ -30,6 +33,15 @@ namespace iot_management_api.Controllers
         [ProducesResponseType(typeof(IEnumerable<DeviceModel>), 200)]
         public async Task<IActionResult> GetAvailable(DateOnly date, int scheduleId)
         {
+            //check if date expired
+            if (date < DateOnly.FromDateTime(DateTime.Now))
+                return BadRequest("Date is expired");
+
+            //check if this date is the date of schedule
+            var ifDateIsScheduleDate = await _scheduleService.CheckDateSchedule(date, scheduleId);
+            if (!ifDateIsScheduleDate)
+                return BadRequest("Date/Schedule mismatch");
+
             var entity = await _deviceService.GetAvailableAsync(date, scheduleId);
 
             if (entity==null)
