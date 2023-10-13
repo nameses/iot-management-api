@@ -63,5 +63,27 @@ namespace iot_management_api.Helper
 
             return septemberFirst;
         }
+
+        public (WeekEnum, DayEnum) GetWeekDateEnums(DateOnly date)
+        {
+            var firstMonday = GetMondayOfFirstWeek();
+            WeekEnum currentWeek = WeekEnum.First;
+            DayEnum currentDay = DayEnum.Monday;
+            int days = ((date.ToDateTime(TimeOnly.MinValue)-firstMonday.ToDateTime(TimeOnly.MinValue))).Days;
+
+            if (days/7==1)
+            {
+                days-=7;
+                currentWeek++;// = WeekEnum.Second;
+            }
+            if (days>7) throw new Exception("Exception during convertion from date to week and date enums");
+            while (days>0)
+            {
+                currentDay++;
+                days--;
+            }
+
+            return (currentWeek, currentDay);
+        }
     }
 }
