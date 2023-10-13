@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
@@ -46,7 +46,7 @@ namespace iot_management_api.Services
                     weekGroup => weekGroup.Key,
                     weekGroup => weekGroup
                         .GroupBy(x => x.Period.Day)
-                        .OrderBy(m => m.Key)
+                        //.OrderBy(m => m.Key)
                         .ToDictionary(
                             dayGroup => dayGroup.Key,
                             dayGroup => dayGroup
@@ -54,6 +54,28 @@ namespace iot_management_api.Services
                             .OrderBy(scheduleModel => scheduleModel.Period.SubjectNumber)
                             .ToList()
                         )
+                );
+
+            var allDayEnums = Enum.GetValues(typeof(DayEnum)).Cast<DayEnum>().ToArray();
+
+            foreach (var weekGroup in dict)
+            {
+                var list = new List<DayEnum>();
+                foreach (var dayEnum in allDayEnums)
+                {
+                    if (!weekGroup.Value.ContainsKey(dayEnum))
+                        list.Add(dayEnum);
+                }
+                foreach (var elem in list)
+                    dict[weekGroup.Key].Add(elem, new List<ScheduleModel>());
+            }
+
+            dict = dict
+                .ToDictionary(
+                    outer => outer.Key,
+                    outer => outer.Value
+                        .OrderBy(inner => inner.Key)
+                        .ToDictionary(inner => inner.Key, inner => inner.Value)
                 );
 
             return ConvertDateEnumToDateOnly(dict);
