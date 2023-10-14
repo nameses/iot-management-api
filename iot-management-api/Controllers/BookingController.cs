@@ -18,6 +18,8 @@ namespace iot_management_api.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<BookingController> _logger;
 
+        public record struct ApproveDeviceReq(int bookingId);
+
         public BookingController(IBookingService bookingService,
             IDeviceService deviceService,
             IScheduleService scheduleService,
@@ -32,7 +34,26 @@ namespace iot_management_api.Controllers
         }
 
         [HttpPost]
-        [Route("book/device/{deviceId}")]
+        [Route("approve")]
+        [Authorize(Policy = "TeacherAccess")]
+        public async Task<IActionResult> ApproveDevice([FromBody] ApproveDeviceReq req)
+        {
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+
+            var resStatusMessage = await _bookingService.ApproveBooking(userId, req.bookingId);
+
+            if (!resStatusMessage.res)
+            {
+                if (resStatusMessage.message=="Not Found")
+                    return NotFound();
+                return BadRequest(resStatusMessage.Item2);
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("device/{deviceId}")]
         [Authorize(Policy = "StudentAccess")]
         public async Task<IActionResult> BookDevice([FromRoute] int deviceId, [FromQuery] DateOnly date, int scheduleId)
         {
