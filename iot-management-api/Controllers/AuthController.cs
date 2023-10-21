@@ -60,6 +60,10 @@ namespace iot_management_api.Controllers
         [ProducesResponseType(typeof(SignUpResponse), 200)]
         public async Task<IActionResult> SignUpStudent([FromBody] StudentSignUpRequest request)
         {
+            var user = await _studentService.GetByEmailAsync(request.User.Email);
+            if (user!=null)
+                return BadRequest("Email already used");
+
             var createdId = await _studentService.CreateAsync(_mapper.Map<Student>(request.User), request.GroupCode);
 
             if (createdId == null)
@@ -79,6 +83,10 @@ namespace iot_management_api.Controllers
         [ProducesResponseType(typeof(SignUpResponse), 200)]
         public async Task<IActionResult> SignUpTeacher([FromBody] TeacherSignUpRequest request)
         {
+            var user = await _teacherService.GetByEmailAsync(request.User.Email);
+            if (user!=null)
+                return BadRequest("Email already used");
+
             var createdId = await _teacherService.CreateAsync(_mapper.Map<Teacher>(request.User));
 
             if (createdId == null)
