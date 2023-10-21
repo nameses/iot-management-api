@@ -4,6 +4,7 @@ using iot_management_api.Entities.common;
 using iot_management_api.Models;
 using iot_management_api.Models.common;
 using static iot_management_api.Controllers.AuthController;
+using static iot_management_api.Controllers.BookingController;
 using static iot_management_api.Controllers.DeviceController;
 using static iot_management_api.Controllers.SubjectController;
 
@@ -74,6 +75,7 @@ namespace iot_management_api.Helper
             CreateMap<DayMapping, DayMappingModel>();
 
             CreateMap<Booking, BookingModel>();
+            CreateMap<Booking, BookingForStudentModel>();
         }
     }
 }

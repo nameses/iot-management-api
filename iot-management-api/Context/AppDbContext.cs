@@ -32,6 +32,13 @@ namespace iot_management_api.Context
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<Student>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+            builder.Entity<Teacher>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
             builder.Entity<Group>()
                 .HasIndex(u => u.GroupCode)
                 .IsUnique();

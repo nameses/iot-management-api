@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using iot_management_api.Entities;
 using iot_management_api.Entities.common;
 using iot_management_api.Models;
 using iot_management_api.Services;
@@ -18,6 +19,8 @@ namespace iot_management_api.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<BookingController> _logger;
 
+        //public record struct ApproveRejectDeviceReq(int bookingId);
+
         public BookingController(IBookingService bookingService,
             IDeviceService deviceService,
             IScheduleService scheduleService,
@@ -31,8 +34,91 @@ namespace iot_management_api.Controllers
             _logger=logger;
         }
 
+        [HttpGet]
+        [Route("full")]
+        //[Authorize(Policy = "StudentAccess")]
+        public async Task<IActionResult> GetBookings([FromQuery] DateOnly date, int scheduleId)
+        {
+            var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+
+            //check if date expired
+            if (date < DateOnly.FromDateTime(DateTime.Now))
+                return BadRequest("Date is expired");
+
+            //check if this date is the date of schedule
+            var ifDateIsScheduleDate = await _scheduleService.CheckDateSchedule(date, scheduleId);
+            if (!ifDateIsScheduleDate)
+                return BadRequest("Date/Schedule mismatch");
+
+            //check if User is assigned to this schedule
+            var ifUserAssignedToSchedule = await _scheduleService.CheckUserAssignmentToSchedule(userRole, userId, scheduleId);
+            if (!ifUserAssignedToSchedule)
+                return BadRequest("Current user is not assigned to this schedule");
+
+            if (userRole == UserRole.Student)
+            {
+                var bookings = await _bookingService.GetStudentBookings(date, scheduleId, userId);
+
+                if (bookings.IsNullOrEmpty())
+                    return NotFound();
+
+                return Ok(_mapper.Map<IEnumerable<BookingForStudentModel>>(bookings));
+
+            }
+            else if (userRole == UserRole.Teacher)
+            {
+                var bookings = await _bookingService.GetBookingsForTeacher(date, scheduleId, userId);
+
+                if (bookings.IsNullOrEmpty())
+                    return NotFound();
+
+                return Ok(_mapper.Map<IEnumerable<BookingModel>>(bookings));
+            }
+
+            return NotFound();
+        }
+
         [HttpPost]
-        [Route("book/device/{deviceId}")]
+        [Route("approve/{bookingId}")]
+        [Authorize(Policy = "TeacherAccess")]
+        public async Task<IActionResult> ApproveDevice([FromRoute] int bookingId)//, [FromBody] ApproveRejectDeviceReq req)
+        {
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+
+            var resStatusMessage = await _bookingService.ApproveBooking(userId, bookingId); //req.bookingId);
+
+            if (!resStatusMessage.res)
+            {
+                if (resStatusMessage.message=="Not Found")
+                    return NotFound();
+                return BadRequest(resStatusMessage.message);
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("reject/{bookingId}")]
+        [Authorize(Policy = "TeacherAccess")]
+        public async Task<IActionResult> RejectDevice([FromRoute] int bookingId)//, [FromBody] ApproveRejectDeviceReq req)
+        {
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+
+            var resStatusMessage = await _bookingService.RejectBooking(userId, bookingId); //req.bookingId);
+
+            if (!resStatusMessage.res)
+            {
+                if (resStatusMessage.message=="Not Found")
+                    return NotFound();
+                return BadRequest(resStatusMessage.message);
+            }
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("device/{deviceId}")]
         [Authorize(Policy = "StudentAccess")]
         public async Task<IActionResult> BookDevice([FromRoute] int deviceId, [FromQuery] DateOnly date, int scheduleId)
         {
@@ -77,5 +163,15 @@ namespace iot_management_api.Controllers
 
             return Ok(_mapper.Map<IEnumerable<BookingModel>>(entities));
         }
+
+
+        public class BookingForStudentModel
+        {
+            public int Id { get; set; }
+            public DateOnly Date { get; set; }
+            public BookingStatus Status { get; set; }
+            public DeviceModel? Device { get; set; }
+        }
+
     }
 }
