@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using iot_management_api.Models;
 using iot_management_api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +22,12 @@ namespace iot_management_api.Controllers
             _mapper=mapper;
             _logger=logger;
         }
-
+        /// <summary>
+        /// Get a list of day mapping (lesson number, its start and end)
+        /// </summary>
+        /// <returns>List of daymappings</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="401">Unathorized</response>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(typeof(IEnumerable<DayMappingModel>), 200)]

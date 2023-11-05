@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using iot_management_api.Entities.common;
 using iot_management_api.Helper;
 using iot_management_api.Models;
@@ -29,6 +29,13 @@ namespace iot_management_api.Controllers
             _logger=logger;
         }
 
+        /// <summary>
+        /// Show a full 2-week schedule and current week(1 or 2)
+        /// </summary>
+        /// <returns>Dictionary with key of WeekEnum(0-1), each contains a dictionary with key DayEnum(0-6) and value List of ScheduleModel</returns>
+        /// <response code="200">Request Successful. Returns dictionary with key of WeekEnum(0-1), each contains a dictionary with key DayEnum(0-6) and value List of ScheduleModel</response>
+        /// <response code="404">Not found</response>
+        /// <response code="401">Unathorized</response>
         [HttpGet]
         [Authorize]
         [Route("full")]

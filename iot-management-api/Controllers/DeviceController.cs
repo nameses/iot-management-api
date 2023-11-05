@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using iot_management_api.Entities;
 using iot_management_api.Models;
 using iot_management_api.Services;
@@ -26,7 +26,13 @@ namespace iot_management_api.Controllers
             _mapper=mapper;
             _logger=logger;
         }
-
+        /// <summary>
+        /// Show list of available devices
+        /// </summary>
+        /// <returns>List of devices</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Date is expired, Date/Schedule mismatch</response>
+        /// <response code="401">Unathorized</response>
         [HttpGet]
         [Authorize]
         [Route("available")]
@@ -50,6 +56,14 @@ namespace iot_management_api.Controllers
             return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entity));
         }
 
+        /// <summary>
+        /// Get device by id
+        /// </summary>
+        /// <returns>Device</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="404">Not found</response>
+        /// <response code="401">Unathorized</response>
+        /// <response code="403">Forbidden</response>
         [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
         [Route("{id}")]
@@ -64,6 +78,13 @@ namespace iot_management_api.Controllers
             return Ok(_mapper.Map<DeviceModel>(entity));
         }
 
+        /// <summary>
+        /// Get devices by room number
+        /// </summary>
+        /// <returns>List of devices</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="401">Unathorized</response>
+        /// <response code="403">Forbidden</response>
         [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
         [ProducesResponseType(typeof(List<DeviceModel>), 200)]
