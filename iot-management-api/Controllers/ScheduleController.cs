@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using iot_management_api.Entities.common;
 using iot_management_api.Helper;
 using iot_management_api.Models;
@@ -40,19 +40,18 @@ namespace iot_management_api.Controllers
         [Authorize]
         [Route("full")]
         [ProducesResponseType(typeof(ScheduleFullResponse), 200)]
-        public async Task<IActionResult> GetFull()
+        public async Task<IActionResult> GetFull([FromQuery] DateOnly? date)
         {
             var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
             var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
 
-            var scheduleDict = await _scheduleService.GetFullAsync(userRole, userId);
+            if (date == null) date = DateOnly.FromDateTime(DateTime.Now);
 
-            if (scheduleDict==null)
-                return NotFound();
+            var scheduleDict = await _scheduleService.GetFullAsync(userRole, userId, date.Value);
 
             return Ok(new ScheduleFullResponse
             {
-                Schedule = scheduleDict,
+                Schedule = scheduleDict!,
                 CurrentWeek = _weekService.GetCurrentWeek(),
             });
         }
