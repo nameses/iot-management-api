@@ -26,7 +26,13 @@ namespace iot_management_api.Controllers
             _mapper=mapper;
             _logger=logger;
         }
-
+        /// <summary>
+        /// Show list of available devices
+        /// </summary>
+        /// <returns>List of devices</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Date is expired, Date/Schedule mismatch</response>
+        /// <response code="401">Unathorized</response>
         [HttpGet]
         [Authorize]
         [Route("available")]
@@ -42,14 +48,22 @@ namespace iot_management_api.Controllers
             if (!ifDateIsScheduleDate)
                 return BadRequest("Date/Schedule mismatch");
 
-            var entity = await _deviceService.GetAvailableAsync(date, scheduleId);
+            var entities = await _deviceService.GetAvailableAsync(date, scheduleId);
 
-            if (entity==null)
-                return NotFound();
+            if (entities==null)
+                return Ok(Array.Empty<string>());
 
-            return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entity));
+            return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entities));
         }
 
+        /// <summary>
+        /// Get device by id
+        /// </summary>
+        /// <returns>Device</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="404">Not found</response>
+        /// <response code="401">Unathorized</response>
+        /// <response code="403">Forbidden</response>
         [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
         [Route("{id}")]
@@ -64,6 +78,13 @@ namespace iot_management_api.Controllers
             return Ok(_mapper.Map<DeviceModel>(entity));
         }
 
+        /// <summary>
+        /// Get devices by room number
+        /// </summary>
+        /// <returns>List of devices</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="401">Unathorized</response>
+        /// <response code="403">Forbidden</response>
         [HttpGet]
         [Authorize(Policy = "TeacherAccess")]
         [ProducesResponseType(typeof(List<DeviceModel>), 200)]
@@ -72,7 +93,7 @@ namespace iot_management_api.Controllers
             var entities = await _deviceService.GetByRoomAsync(room);
 
             if (entities==null)
-                return NotFound();
+                return Ok(Array.Empty<string>());
 
             return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entities));
         }

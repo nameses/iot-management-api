@@ -29,23 +29,29 @@ namespace iot_management_api.Controllers
             _logger=logger;
         }
 
+        /// <summary>
+        /// Show a full 2-week schedule and current week(1 or 2)
+        /// </summary>
+        /// <returns>Dictionary with key of WeekEnum(0-1), each contains a dictionary with key DayEnum(0-6) and value List of ScheduleModel</returns>
+        /// <response code="200">Request Successful. Returns dictionary with key of WeekEnum(0-1), each contains a dictionary with key DayEnum(0-6) and value List of ScheduleModel</response>
+        /// <response code="404">Not found</response>
+        /// <response code="401">Unathorized</response>
         [HttpGet]
         [Authorize]
         [Route("full")]
         [ProducesResponseType(typeof(ScheduleFullResponse), 200)]
-        public async Task<IActionResult> GetFull()
+        public async Task<IActionResult> GetFull([FromQuery] DateOnly? date)
         {
             var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
             var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
 
-            var scheduleDict = await _scheduleService.GetFullAsync(userRole, userId);
+            if (date == null) date = DateOnly.FromDateTime(DateTime.Now);
 
-            if (scheduleDict==null)
-                return NotFound();
+            var scheduleDict = await _scheduleService.GetFullAsync(userRole, userId, date.Value);
 
             return Ok(new ScheduleFullResponse
             {
-                Schedule = scheduleDict,
+                Schedule = scheduleDict!,
                 CurrentWeek = _weekService.GetCurrentWeek(),
             });
         }

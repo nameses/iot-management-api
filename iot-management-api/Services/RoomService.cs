@@ -7,6 +7,7 @@ namespace iot_management_api.Services
 {
     public interface IRoomService
     {
+        Task<IEnumerable<Room>?> GetAllAsync();
         Task<Room?> GetByNumberAsync(int? number);
         Task<Room?> GetByIdAsync(int? id);
         Task<int?> CreateAsync(Room entity);
@@ -27,6 +28,19 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
+        public async Task<IEnumerable<Room>?> GetAllAsync()
+        {
+            var entities = await _context.Rooms.ToListAsync();
+
+            if (entities==null)
+            {
+                _logger.LogInformation($"No rooms not found");
+                return null;
+            }
+
+            return entities;
+        }
+
         public async Task<Room?> GetByNumberAsync(int? number)
         {
             var entity = await _context.Rooms

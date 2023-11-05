@@ -34,9 +34,19 @@ namespace iot_management_api.Controllers
             _logger=logger;
         }
 
+        /// <summary>
+        /// Get bookings for some date and schedule id
+        /// </summary>
+        /// <returns>List of bookings</returns>
+        /// <param name="date">Date of bookings</param>
+        /// <param name="scheduleId">Id of schedule(lesson)</param>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Date is expired / Date-Schedule mismatch / Current user is not assigned to this schedule</response>
+        /// <response code="401">Unathorized</response>
         [HttpGet]
         [Route("full")]
-        //[Authorize(Policy = "StudentAccess")]
+        [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<BookingForStudentModel>), 200)]
         public async Task<IActionResult> GetBookings([FromQuery] DateOnly date, int scheduleId)
         {
             var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
@@ -61,7 +71,7 @@ namespace iot_management_api.Controllers
                 var bookings = await _bookingService.GetStudentBookings(date, scheduleId, userId);
 
                 if (bookings.IsNullOrEmpty())
-                    return NotFound();
+                    return Ok(Array.Empty<string>());
 
                 return Ok(_mapper.Map<IEnumerable<BookingForStudentModel>>(bookings));
 
@@ -71,14 +81,69 @@ namespace iot_management_api.Controllers
                 var bookings = await _bookingService.GetBookingsForTeacher(date, scheduleId, userId);
 
                 if (bookings.IsNullOrEmpty())
-                    return NotFound();
+                    return Ok(Array.Empty<string>());
 
                 return Ok(_mapper.Map<IEnumerable<BookingModel>>(bookings));
             }
 
-            return NotFound();
+            return Ok(Array.Empty<string>());
         }
 
+        /// <summary>
+        /// Get bookings for some date and schedule id
+        /// </summary>
+        /// <returns>List of bookings</returns>
+        /// <param name="dateFrom">Date, from which get bookings(must not be in past)</param>
+        /// <param name="dateTo">Date limiter</param>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Wrong period(dateFrom-dateTo problems)</response>
+        /// <response code="401">Unathorized</response>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetBookingsFromPeriod([FromQuery] DateOnly? dateFrom, DateOnly? dateTo)
+        {
+            var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+            var currentDate = DateOnly.FromDateTime(DateTime.Now);
+
+            //check dates
+            if (dateFrom==null || dateFrom<currentDate)
+                dateFrom=currentDate;
+
+            if (dateTo < currentDate || dateTo < dateFrom)
+                return BadRequest("Wrong period(dateFrom-dateTo problems)");
+
+            if (userRole == UserRole.Student)
+            {
+                var entities = await _bookingService.GetStudentBookings(userId, dateFrom, dateTo);
+
+                if (entities.IsNullOrEmpty())
+                    return Ok(Array.Empty<string>());
+
+                return Ok(_mapper.Map<IEnumerable<BookingForStudentModel>>(entities));
+            }
+            else if (userRole == UserRole.Teacher)
+            {
+                var entities = await _bookingService.GetBookingsForTeacher(userId, dateFrom, dateTo);
+
+                if (entities.IsNullOrEmpty())
+                    return Ok(Array.Empty<string>());
+
+                return Ok(_mapper.Map<IEnumerable<BookingModel>>(entities));
+            }
+
+            return Ok(Array.Empty<string>());
+        }
+
+        /// <summary>
+        /// Approve device booking (teacher access)
+        /// </summary>
+        /// <returns>List of bookings</returns>
+        /// <param name="bookingId">Booking id</param>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Date is expired / Teacher does not have access to this group / Booking request already approved / There are no available devices for this schedule</response>
+        /// <response code="401">Unathorized</response>
+        /// <response code="403">Forbidden</response>
         [HttpPost]
         [Route("approve/{bookingId}")]
         [Authorize(Policy = "TeacherAccess")]
@@ -98,6 +163,15 @@ namespace iot_management_api.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Reject device booking (teacher access)
+        /// </summary>
+        /// <returns>List of bookings</returns>
+        /// <param name="bookingId">Booking id</param>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Date is expired / Teacher does not have access to this group / Booking request already approved / There are no available devices for this schedule</response>
+        /// <response code="401">Unathorized</response>
+        /// <response code="403">Forbidden</response>
         [HttpPost]
         [Route("reject/{bookingId}")]
         [Authorize(Policy = "TeacherAccess")]
@@ -117,6 +191,17 @@ namespace iot_management_api.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Booking of device for date and schedule(lesson) (student access)
+        /// </summary>
+        /// <returns>List of bookings</returns>
+        /// <param name="deviceId">Device id</param>
+        /// <param name="date">Date of booking</param>
+        /// <param name="scheduleId">Schedule id</param>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Date is expired / Teacher does not have access to this group / Booking request already approved / Device is not available</response>
+        /// <response code="401">Unathorized</response>
+        /// <response code="403">Forbidden</response>
         [HttpPost]
         [Route("device/{deviceId}")]
         [Authorize(Policy = "StudentAccess")]
@@ -124,6 +209,7 @@ namespace iot_management_api.Controllers
         {
             var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
             var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+
             //check if date expired
             if (date < DateOnly.FromDateTime(DateTime.Now))
                 return BadRequest("Date is expired");
@@ -148,7 +234,14 @@ namespace iot_management_api.Controllers
             await _bookingService.BookDeviceAsync(deviceId, userId, date, scheduleId);
             return Ok();
         }
-
+        /// <summary>
+        /// Show bookings with pending status
+        /// </summary>
+        /// <returns>List of bookings</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Bad Request</response>
+        /// <response code="401">Unathorized</response>
+        /// <response code="403">Forbidden</response>
         [HttpGet]
         [Route("requests")]
         [Authorize(Policy = "TeacherAccess")]
@@ -159,11 +252,10 @@ namespace iot_management_api.Controllers
             var entities = await _bookingService.ShowStudentsRequestsForTeacherAsync(userId);
 
             if (entities.IsNullOrEmpty())
-                return NotFound();
+                return Ok(Array.Empty<string>());
 
             return Ok(_mapper.Map<IEnumerable<BookingModel>>(entities));
         }
-
 
         public class BookingForStudentModel
         {

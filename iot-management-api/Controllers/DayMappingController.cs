@@ -22,7 +22,12 @@ namespace iot_management_api.Controllers
             _mapper=mapper;
             _logger=logger;
         }
-
+        /// <summary>
+        /// Get a list of day mapping (lesson number, its start and end)
+        /// </summary>
+        /// <returns>List of daymappings</returns>
+        /// <response code="200">Request Successful</response>
+        /// <response code="401">Unathorized</response>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(typeof(IEnumerable<DayMappingModel>), 200)]
@@ -31,7 +36,7 @@ namespace iot_management_api.Controllers
             var entities = await _dayMappingService.GetAllAsync();
 
             if (entities==null)
-                return NotFound();
+                return Ok(Array.Empty<string>());
 
             return Ok(_mapper.Map<IEnumerable<DayMappingModel>>(entities));
         }
