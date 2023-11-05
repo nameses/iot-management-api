@@ -81,12 +81,58 @@ namespace iot_management_api.Controllers
                 var bookings = await _bookingService.GetBookingsForTeacher(date, scheduleId, userId);
 
                 if (bookings.IsNullOrEmpty())
-                    return NotFound();
+                    return Ok(Array.Empty<string>());
 
                 return Ok(_mapper.Map<IEnumerable<BookingModel>>(bookings));
             }
 
-            return NotFound();
+            return Ok(Array.Empty<string>());
+        }
+
+        /// <summary>
+        /// Get bookings for some date and schedule id
+        /// </summary>
+        /// <returns>List of bookings</returns>
+        /// <param name="dateFrom">Date, from which get bookings(must not be in past)</param>
+        /// <param name="dateTo">Date limiter</param>
+        /// <response code="200">Request Successful</response>
+        /// <response code="400">Wrong period(dateFrom-dateTo problems)</response>
+        /// <response code="401">Unathorized</response>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetBookingsFromPeriod([FromQuery] DateOnly? dateFrom, DateOnly? dateTo)
+        {
+            var userRole = Enum.Parse<UserRole>(HttpContext.User.Claims?.First(x => x.Type == "role").Value!);
+            var userId = int.Parse(HttpContext.User.Claims?.First(x => x.Type == "id").Value!);
+            var currentDate = DateOnly.FromDateTime(DateTime.Now);
+
+            //check dates
+            if (dateFrom==null || dateFrom<currentDate)
+                dateFrom=currentDate;
+
+            if (dateTo < currentDate || dateTo < dateFrom)
+                return BadRequest("Wrong period(dateFrom-dateTo problems)");
+
+            if (userRole == UserRole.Student)
+            {
+                var entities = await _bookingService.GetStudentBookings(userId, dateFrom, dateTo);
+
+                if (entities.IsNullOrEmpty())
+                    return Ok(Array.Empty<string>());
+
+                return Ok(_mapper.Map<IEnumerable<BookingForStudentModel>>(entities));
+            }
+            else if (userRole == UserRole.Teacher)
+            {
+                var entities = await _bookingService.GetBookingsForTeacher(userId, dateFrom, dateTo);
+
+                if (entities.IsNullOrEmpty())
+                    return Ok(Array.Empty<string>());
+
+                return Ok(_mapper.Map<IEnumerable<BookingModel>>(entities));
+            }
+
+            return Ok(Array.Empty<string>());
         }
 
         /// <summary>
