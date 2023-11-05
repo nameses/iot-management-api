@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +13,9 @@ namespace iot_management_api.Services
         Task<(bool res, string? message)> ApproveBooking(int teacherId, int bookingId);
         Task<(bool res, string? message)> RejectBooking(int teacherId, int bookingId);
         Task<IEnumerable<Booking>?> GetStudentBookings(DateOnly date, int scheduleId, int studentId);
+        Task<IEnumerable<Booking>?> GetStudentBookings(int studentId, DateOnly? dateFrom = null, DateOnly? dateTo = null);
         Task<IEnumerable<Booking>?> GetBookingsForTeacher(DateOnly date, int scheduleId, int studentId);
+        Task<IEnumerable<Booking>?> GetBookingsForTeacher(int teacherId, DateOnly? dateFrom = null, DateOnly? dateTo = null);
 
     }
     public class BookingService : IBookingService
@@ -52,12 +54,32 @@ namespace iot_management_api.Services
                 .Where(x => subjects.Contains(x.Schedule!.SubjectId!.Value) && x.ScheduleId==scheduleId && x.Date==date)
                 .ToListAsync();
 
-            if (bookings.IsNullOrEmpty())
-                return null;
-
-            return bookings;
+            return bookings.IsNullOrEmpty() ? null : bookings;
         }
+        public async Task<IEnumerable<Booking>?> GetBookingsForTeacher(int teacherId, DateOnly? dateFrom = null, DateOnly? dateTo = null)
+        {
+            dateFrom ??= DateOnly.FromDateTime(DateTime.Now);
 
+            var subjects = await _context.Subjects
+                .Where(x => x.TeacherId==teacherId)
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            if (subjects.IsNullOrEmpty()) return null;
+
+            var query = _context.Bookings
+                .Include(x => x.Schedule)
+                .Include(x => x.Schedule!.Period)
+                .Include(x => x.Student)
+                .Include(x => x.Device)
+                .Include(x => x.Device!.DeviceInfo)
+                .Where(x => subjects.Contains(x.Schedule!.SubjectId!.Value)
+                    && (dateTo==null ? (x.Date>=dateFrom) : (x.Date>=dateFrom&&x.Date<=dateTo)));
+
+            var bookings = await query.ToListAsync();
+
+            return bookings.IsNullOrEmpty() ? null : bookings;
+        }
         public async Task<IEnumerable<Booking>?> GetStudentBookings(DateOnly date, int scheduleId, int studentId)
         {
             var bookings = await _context.Bookings
@@ -68,12 +90,25 @@ namespace iot_management_api.Services
                 .Where(x => x.StudentId==studentId && x.ScheduleId==scheduleId && x.Date==date)
                 .ToListAsync();
 
-            if (bookings.IsNullOrEmpty())
-                return null;
-
-            return bookings;
+            return bookings.IsNullOrEmpty() ? null : bookings;
         }
+        public async Task<IEnumerable<Booking>?> GetStudentBookings(int studentId, DateOnly? dateFrom = null, DateOnly? dateTo = null)
+        {
+            dateFrom ??= DateOnly.FromDateTime(DateTime.Now);
 
+            var query = _context.Bookings
+                .Include(x => x.Schedule)
+                .Include(x => x.Schedule!.Period)
+                .Include(x => x.Student)
+                .Include(x => x.Device)
+                .Include(x => x.Device!.DeviceInfo)
+                .Where(x => x.StudentId==studentId
+                    && (dateTo==null ? (x.Date>=dateFrom) : (x.Date>=dateFrom&&x.Date<=dateTo)));
+
+            var bookings = await query.ToListAsync();
+
+            return bookings.IsNullOrEmpty() ? null : bookings;
+        }
         public async Task BookDeviceAsync(int deviceId, int studentId, DateOnly date, int scheduleId)
         {
             var booking = new Booking()
