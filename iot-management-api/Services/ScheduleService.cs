@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
@@ -150,18 +150,18 @@ namespace iot_management_api.Services
                 .Include(x => x.Subject)
                 .Include(x => x.Room)
                 .AsSplitQuery()
-                .Where(x => x.SubjectId==subject.Id
-                    && x.Period!.Year==DateTime.Now.Year
-                    && x.Period.Semester == GetCurrentSemester())
+                .Where(x => subjects.Contains(x.SubjectId!.Value)
+                    && x.Period!.Year==date.Year
+                    && x.Period.Semester == GetCurrentSemester(date))
                 .ToListAsync();
         }
 
-        private static SemesterEnum GetCurrentSemester()
+        private static SemesterEnum GetCurrentSemester(DateOnly date)
         {
             const int firstMonth = 9;
             const int secondMonth = 2;
 
-            var currentMonth = DateTime.Now.Month;
+            var currentMonth = date.Month;
 
             if (currentMonth>=firstMonth || currentMonth<secondMonth)
                 return SemesterEnum.First;
