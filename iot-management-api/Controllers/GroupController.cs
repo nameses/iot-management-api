@@ -26,7 +26,7 @@ namespace iot_management_api.Controllers
             var group = await _groupService.GetAllAsync();
 
             if (group==null)
-                return NotFound();
+                return Ok(Array.Empty<string>());
 
             return Ok(_mapper.Map<IEnumerable<GroupModel>?>(group));
         }

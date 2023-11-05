@@ -333,7 +333,7 @@ namespace iot_management_api.Helper
                     Name = "Mike",
                     Surname = "Peterson",
                     Email = "mike.peterson@gmail.com",
-                    Password = _encrypter.Encrypt("mike.peterson@gmail.co"),
+                    Password = _encrypter.Encrypt("mike.peterson@gmail.com"),
                     CreatedAt = DateTime.Now
                 }, new Teacher
                 {

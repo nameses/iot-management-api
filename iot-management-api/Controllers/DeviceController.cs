@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using iot_management_api.Entities;
 using iot_management_api.Models;
 using iot_management_api.Services;
@@ -48,12 +48,12 @@ namespace iot_management_api.Controllers
             if (!ifDateIsScheduleDate)
                 return BadRequest("Date/Schedule mismatch");
 
-            var entity = await _deviceService.GetAvailableAsync(date, scheduleId);
+            var entities = await _deviceService.GetAvailableAsync(date, scheduleId);
 
-            if (entity==null)
-                return NotFound();
+            if (entities==null)
+                return Ok(Array.Empty<string>());
 
-            return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entity));
+            return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entities));
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace iot_management_api.Controllers
             var entities = await _deviceService.GetByRoomAsync(room);
 
             if (entities==null)
-                return NotFound();
+                return Ok(Array.Empty<string>());
 
             return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entities));
         }

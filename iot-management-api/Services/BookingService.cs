@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -96,6 +96,8 @@ namespace iot_management_api.Services
                 .Where(x => x.TeacherId==userId)
                 .Select(x => x.Id)
                 .ToListAsync();
+
+            if (subjects.IsNullOrEmpty()) return null;
 
             var bookings = await _context.Bookings
                 .Include(x => x.Schedule)

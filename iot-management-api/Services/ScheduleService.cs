@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
@@ -10,7 +10,7 @@ namespace iot_management_api.Services
 {
     public interface IScheduleService
     {
-        Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFullAsync(UserRole userRole, int userId);
+        Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFullAsync(UserRole userRole, int userId, DateOnly date);
         Task<bool> CheckUserAssignmentToSchedule(UserRole userRole, int userId, int scheduleId);
         Task<bool> CheckDateSchedule(DateOnly date, int scheduleId);
     }
@@ -31,13 +31,13 @@ namespace iot_management_api.Services
             _mapper=mapper;
             _logger=logger;
         }
-        public async Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFullAsync(UserRole userRole, int userId)
+        public async Task<Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>?> GetFullAsync(UserRole userRole, int userId, DateOnly date)
         {
             List<Schedule>? entities = null;
             if (userRole==UserRole.Student)
-                entities = await GetStudentSchedule(userId);
+                entities = await GetStudentSchedule(userId, date);
             if (userRole==UserRole.Teacher)
-                entities = await GetTeacherSchedule(userId);
+                entities = await GetTeacherSchedule(userId, date);
 
             if (entities==null)
                 return null;
@@ -80,14 +80,14 @@ namespace iot_management_api.Services
                         .ToDictionary(inner => inner.Key, inner => inner.Value)
                 );
 
-            return ConvertDateEnumToDateOnly(dict);
+            return ConvertDateEnumToDateOnly(dict, date);
         }
         private Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>? ConvertDateEnumToDateOnly(
-            Dictionary<WeekEnum, Dictionary<DayEnum, List<ScheduleModel>>> originalData)
+            Dictionary<WeekEnum, Dictionary<DayEnum, List<ScheduleModel>>> originalData, DateOnly dateCopyFrom)
         {
             var convertedData = new Dictionary<WeekEnum, Dictionary<DateOnly, List<ScheduleModel>>>();
 
-            var mondayFirstWeekDate = _weekService.GetMondayOfFirstWeek(DateOnly.FromDateTime(DateTime.Now));
+            var mondayFirstWeekDate = _weekService.GetMondayOfFirstWeek(dateCopyFrom);
 
             foreach (var weekEntry in originalData)
             {
@@ -111,7 +111,7 @@ namespace iot_management_api.Services
             return convertedData;
         }
 
-        private async Task<List<Schedule>?> GetStudentSchedule(int userId)
+        private async Task<List<Schedule>?> GetStudentSchedule(int userId, DateOnly date)
         {
             var user = await _context.Students.FirstOrDefaultAsync(x => x.Id == userId);
             if (user==null) return null;
@@ -128,20 +128,20 @@ namespace iot_management_api.Services
                 .Include(x => x.Room)
                 .AsSplitQuery()
                 .Where(x => x.Groups.Contains(group)
-                    && x.Period!.Year==DateTime.Now.Year
-                    && x.Period.Semester == GetCurrentSemester())
+                    && x.Period!.Year==date.Year
+                    && x.Period.Semester == GetCurrentSemester(date))
                 .ToListAsync();
 
 
         }
 
-        private async Task<List<Schedule>?> GetTeacherSchedule(int userId)
+        private async Task<List<Schedule>?> GetTeacherSchedule(int userId, DateOnly date)
         {
             var user = await _context.Teachers.FirstOrDefaultAsync(x => x.Id == userId);
             if (user==null) return null;
 
-            var subject = await _context.Subjects.FirstOrDefaultAsync(x => x.TeacherId == user.Id);
-            if (subject==null) return null;
+            var subjects = await _context.Subjects.Where(x => x.TeacherId == user.Id).Select(x => x.Id).ToListAsync();
+            if (subjects==null) return null;
 
             return await _context.Schedules
                 .Include(x => x.Groups)

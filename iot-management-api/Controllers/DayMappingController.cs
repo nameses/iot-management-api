@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using iot_management_api.Models;
 using iot_management_api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +36,7 @@ namespace iot_management_api.Controllers
             var entities = await _dayMappingService.GetAllAsync();
 
             if (entities==null)
-                return NotFound();
+                return Ok(Array.Empty<string>());
 
             return Ok(_mapper.Map<IEnumerable<DayMappingModel>>(entities));
         }

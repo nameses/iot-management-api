@@ -1,8 +1,9 @@
-using AutoMapper;
+﻿using AutoMapper;
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
 using iot_management_api.Helper;
 using iot_management_api.Models;
+using iot_management_api.Models.common;
 using iot_management_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -194,15 +195,6 @@ namespace iot_management_api.Controllers
                 token = token
             });
 
-        }
-
-        [HttpGet]
-        [Authorize]
-        [Route("logout")]
-        public async Task<IActionResult> Logout()
-        {
-            //HttpContext.Response.Cookies.Delete("token");
-            return Ok();
         }
 
         public class UserSignUp

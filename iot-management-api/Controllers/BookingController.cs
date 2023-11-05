@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
 using iot_management_api.Models;
@@ -71,7 +71,7 @@ namespace iot_management_api.Controllers
                 var bookings = await _bookingService.GetStudentBookings(date, scheduleId, userId);
 
                 if (bookings.IsNullOrEmpty())
-                    return NotFound();
+                    return Ok(Array.Empty<string>());
 
                 return Ok(_mapper.Map<IEnumerable<BookingForStudentModel>>(bookings));
 
@@ -252,11 +252,10 @@ namespace iot_management_api.Controllers
             var entities = await _bookingService.ShowStudentsRequestsForTeacherAsync(userId);
 
             if (entities.IsNullOrEmpty())
-                return NotFound();
+                return Ok(Array.Empty<string>());
 
             return Ok(_mapper.Map<IEnumerable<BookingModel>>(entities));
         }
-
 
         public class BookingForStudentModel
         {
