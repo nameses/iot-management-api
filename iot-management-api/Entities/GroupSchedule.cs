@@ -13,5 +13,19 @@ namespace iot_management_api.Entities
         public int? ScheduleId { get; set; }
         public Schedule? Schedule { get; set; }
 
+        public override bool Equals(object? obj)
+        {
+            return obj is GroupSchedule schedule&&
+                   Id==schedule.Id&&
+                   GroupId==schedule.GroupId&&
+                   EqualityComparer<Group?>.Default.Equals(Group, schedule.Group)&&
+                   ScheduleId==schedule.ScheduleId&&
+                   EqualityComparer<Schedule?>.Default.Equals(Schedule, schedule.Schedule);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, GroupId, Group, ScheduleId, Schedule);
+        }
     }
 }

@@ -11,5 +11,19 @@ namespace iot_management_api.Entities
         public int SubjectNumber { get; set; }
         public TimeOnly StartTime { get; set; }
         public TimeOnly EndTime { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is DayMapping mapping&&
+                   Id==mapping.Id&&
+                   SubjectNumber==mapping.SubjectNumber&&
+                   StartTime.Equals(mapping.StartTime)&&
+                   EndTime.Equals(mapping.EndTime);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, SubjectNumber, StartTime, EndTime);
+        }
     }
 }
