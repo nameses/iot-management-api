@@ -152,47 +152,39 @@ namespace Iot_xunit_tests
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        //[Fact]
-        //public async Task SignInTeacher_WithValidCredentials_ShouldReturnOk()
-        //{
-        //    // Arrange
-        //    var signInRequest = new SignInRequest
-        //    {
-        //        User = new SignInRequest.SignInUser
-        //        {
-        //            Email = "jane.smith@example.com",
-        //            Password = "password456"
-        //        }
-        //    };
+        [Fact]
+        public async Task SignInTeacher_WithValidCredentials_ShouldReturnOk()
+        {
+            // Arrange
+            var signInRequest = new SignInRequest
+            {
+                User = new SignInRequest.SignInUser
+                {
+                    Email = _sharedSetup.UserEmail,
+                    Password = _sharedSetup.UserEmail
+                }
+            };
 
-        //var controller = new AuthController(
-        //    _sharedSetup.TeacherService.Object,
-        //    _sharedSetup.StudentService.Object,
-        //    _sharedSetup.AuthLogger.Object,
-        //    _sharedSetup.JwtGenerator,
-        //    _sharedSetup.Mapper.Object
-        //);
+            var mockedTeacherService = _sharedSetup.TeacherService;
+            mockedTeacherService.Setup(service => service.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(_sharedSetup.Teacher);
+            //_mockEncrypter.Setup(encrypter => encrypter.Encrypt(It.IsAny<string>())).Returns("hashed_password");
 
-        //    var teacher = new Teacher
-        //    {
-        //        Id = 2,
-        //        Name = "Jane",
-        //        Surname = "Smith",
-        //        Email = "jane.smith@example.com",
-        //        Password = _mockEncrypter.Encrypt("jane.smith@example.com"), // Mocking encryption
-        //        CreatedAt = DateTime.Now
-        //    };
+            var controller = new AuthController(
+                mockedTeacherService.Object,
+                _sharedSetup.StudentService.Object,
+                _sharedSetup.AuthLogger.Object,
+                _sharedSetup.JwtGenerator,
+                _sharedSetup.Mapper.Object
+            );
 
-        //    _mockTeacherService.Setup(service => service.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(teacher);
-        //    _mockEncrypter.Setup(encrypter => encrypter.Encrypt(It.IsAny<string>())).Returns("hashed_password");
+            // Act
+            var result = await controller.SignInTeacher(signInRequest);
 
-        //    // Act
-        //    var result = await controller.SignInTeacher(signInRequest);
-
-        //    // Assert
-        //    var okResult = Assert.IsType<OkObjectResult>(result);
-        //    var signInResponse = Assert.IsType<object>(okResult.Value); // Adjust the type based on your actual response structure
-        //                                                                // Add assertions based on your actual response structure
-        //}
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var res = okResult.Value;
+            var signInResponse = Assert.IsType<TeacherSignInResponse>(okResult.Value);
+            Assert.Equal(signInResponse.User, _sharedSetup.TeacherModel);
+        }
     }
 }
