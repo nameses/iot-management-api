@@ -9,5 +9,19 @@
         /// Schedule description
         /// </summary>
         public string? Lable { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is PeriodModel model&&
+                   SubjectNumber==model.SubjectNumber&&
+                   StartTime.Equals(model.StartTime)&&
+                   EndTime.Equals(model.EndTime)&&
+                   Lable==model.Lable;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(SubjectNumber, StartTime, EndTime, Lable);
+        }
     }
 }
