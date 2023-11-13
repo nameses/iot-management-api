@@ -32,23 +32,26 @@ namespace iot_management_api.Helper
             return date;
         }
 
-        public WeekEnum GetCurrentWeek()
+        public WeekEnum GetCurrentWeek(DateOnly? date = null)
         {
-            var startYear = DateTime.Now.Year;
-            if (DateTime.Now.Month<9)
+            if (date == null)
+                date = DateOnly.FromDateTime(DateTime.Now);
+
+            var startYear = date.Value.Year;
+            if (date.Value.Month<9)
                 startYear--;
             var startDate = GetFirstMondayOfSeptember(startYear);
 
-            var now = DateTime.Now;
+            var dateTo = new DateTime(date.Value.Year, date.Value.Month, date.Value.Day);
             //make now point to monday of this week
-            if (now.DayOfWeek!=DayOfWeek.Monday)
+            if (dateTo.DayOfWeek!=DayOfWeek.Monday)
             {
-                now = now.AddDays(-7);
-                while (now.DayOfWeek != DayOfWeek.Monday)
-                    now = now.AddDays(1);
+                dateTo = dateTo.AddDays(-7);
+                while (dateTo.DayOfWeek != DayOfWeek.Monday)
+                    dateTo = dateTo.AddDays(1);
             }
             //find out current week enum
-            if (((now-startDate).Days/7)%2==0)
+            if (((dateTo-startDate).Days/7)%2==0)
                 return WeekEnum.First;
             else
                 return WeekEnum.Second;

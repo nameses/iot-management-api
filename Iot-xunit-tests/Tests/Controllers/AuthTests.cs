@@ -8,7 +8,7 @@ using Moq;
 using System.Security.Claims;
 using static iot_management_api.Controllers.AuthController;
 
-namespace Iot_xunit_tests
+namespace Iot_xunit_tests.Tests.Controllers
 {
     public class AuthTests : IClassFixture<AuthSharedSetup>
     {
