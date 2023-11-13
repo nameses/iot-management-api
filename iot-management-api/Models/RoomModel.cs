@@ -8,6 +8,19 @@
         /// </summary>
         public int Floor { get; set; }
         public string? Lable { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is RoomModel model&&
+                   Number==model.Number&&
+                   Floor==model.Floor&&
+                   Lable==model.Lable;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Number, Floor, Lable);
+        }
         //public required List<Schedule>? Schedules { get; set; }
         //public required List<Device>? Devices { get; set; }
     }

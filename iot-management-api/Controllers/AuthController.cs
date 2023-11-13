@@ -127,7 +127,7 @@ namespace iot_management_api.Controllers
         /// <response code="400">Password not correct/User not found</response>
         [HttpPost]
         [Route("signin/student")]
-        //[ProducesResponseType(typeof(StudentModel), 200)]
+        [ProducesResponseType(typeof(StudentSignInResponse), 200)]
         public async Task<IActionResult> SignInStudent([FromBody] SignInRequest request)
         {
             //user = await _teacherService.GetByEmail(request.User.Email);
@@ -151,10 +151,10 @@ namespace iot_management_api.Controllers
             //HttpContext.Response.Cookies.Append("token", token);
 
             //response
-            return Ok(new
+            return Ok(new StudentSignInResponse
             {
-                user = _mapper.Map<StudentModel>(user),
-                token
+                User = _mapper.Map<StudentModel>(user),
+                Token = token
             });
         }
 
@@ -166,7 +166,7 @@ namespace iot_management_api.Controllers
         /// <response code="400">User not found/Password not correct.</response>
         [HttpPost]
         [Route("signin/teacher")]
-        //[ProducesResponseType(typeof(TeacherModel), 200)]
+        [ProducesResponseType(typeof(TeacherSignInResponse), 200)]
         public async Task<IActionResult> SignInTeacher([FromBody] SignInRequest request)
         {
             User? user = await _teacherService.GetByEmailAsync(request.User.Email);
@@ -189,10 +189,10 @@ namespace iot_management_api.Controllers
             //HttpContext.Response.Cookies.Append("token", token);
 
             //response
-            return Ok(new
+            return Ok(new TeacherSignInResponse
             {
-                user = _mapper.Map<TeacherModel>(user),
-                token = token
+                User = _mapper.Map<TeacherModel>(user),
+                Token = token
             });
 
         }
@@ -226,6 +226,17 @@ namespace iot_management_api.Controllers
                 public required string Email { get; set; }
                 public required string Password { get; set; }
             }
+        }
+
+        public class TeacherSignInResponse
+        {
+            public TeacherModel User { get; set; }
+            public string Token { get; set; }
+        }
+        public class StudentSignInResponse
+        {
+            public StudentModel User { get; set; }
+            public string Token { get; set; }
         }
     }
 }

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iot-management-api", "iot-management-api\iot-management-api.csproj", "{868F76A2-6FD2-4816-98D2-3C2408C861B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iot-management-api", "iot-management-api\iot-management-api.csproj", "{868F76A2-6FD2-4816-98D2-3C2408C861B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Iot-xunit-tests", "Iot-xunit-tests\Iot-xunit-tests.csproj", "{8808DE71-97A9-4CA0-AA99-77FE5248279F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{868F76A2-6FD2-4816-98D2-3C2408C861B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{868F76A2-6FD2-4816-98D2-3C2408C861B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{868F76A2-6FD2-4816-98D2-3C2408C861B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8808DE71-97A9-4CA0-AA99-77FE5248279F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8808DE71-97A9-4CA0-AA99-77FE5248279F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8808DE71-97A9-4CA0-AA99-77FE5248279F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8808DE71-97A9-4CA0-AA99-77FE5248279F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
