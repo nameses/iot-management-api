@@ -51,6 +51,9 @@ namespace iot_management_api.Services
                 .FirstOrDefaultAsync(x => x.Id==deviceId);
             if (device==null) return false;
 
+            //check if schedule room and device room same
+            if (device.RoomId!=schedule.RoomId) return false;
+
             //get bookings with devices (search by scheduleID, status and date)
             var bookings = await _context.Bookings
                 .Where(x => x.ScheduleId == schedule.Id
