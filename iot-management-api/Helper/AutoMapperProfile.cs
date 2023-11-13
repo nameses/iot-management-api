@@ -74,6 +74,7 @@ namespace iot_management_api.Helper
 
             CreateMap<DayMapping, DayMappingModel>();
 
+            CreateMap<Booking, Booking>();
             CreateMap<Booking, BookingModel>();
             CreateMap<Booking, BookingForStudentModel>();
         }
