@@ -6,7 +6,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 
-namespace iot_management_api.Helper
+namespace iot_management_api.Jwt
 {
     public class JwtHandler : JwtBearerHandler
     {
@@ -21,8 +21,8 @@ namespace iot_management_api.Helper
             ISystemClock clock)
             : base(options, loggerFactory, encoder, clock)
         {
-            _logger=logger;
-            _jwtValidator=jwtValidator;
+            _logger = logger;
+            _jwtValidator = jwtValidator;
         }
 
 
@@ -57,7 +57,7 @@ namespace iot_management_api.Helper
 
             var userId = _jwtValidator.Validate(token!);
 
-            if (userId==null)
+            if (userId == null)
             {
                 return AuthenticateResult.Fail("Token validation failed.");
             }

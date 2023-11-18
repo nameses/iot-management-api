@@ -4,8 +4,10 @@ using iot_management_api.Controllers;
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
 using iot_management_api.Helper;
+using iot_management_api.Jwt;
 using iot_management_api.Models;
 using iot_management_api.Services;
+using Iot_xunit_tests.FakeServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -22,8 +24,6 @@ namespace Iot_xunit_tests.SharedSetup
         private UserRole userRole = UserRole.Teacher;
         private string groupCode = "TV-12";
 
-
-
         public Encrypter Encrypter;
 
         public JwtGenerator JwtGenerator { get; }
@@ -31,6 +31,8 @@ namespace Iot_xunit_tests.SharedSetup
         public Mock<IMapper> Mapper;
         public Mock<IStudentService> StudentService;
         public Mock<ITeacherService> TeacherService;
+        public Mock<FakeStudentService> FakeStudentService;
+        public Mock<FakeTeacherService> FakeTeacherService;
 
         public Teacher Teacher { get; }
         public TeacherModel TeacherModel { get; }
@@ -90,9 +92,11 @@ namespace Iot_xunit_tests.SharedSetup
                 .Returns(TeacherModel);
 
             //teacher/student service
+            FakeStudentService = new Mock<FakeStudentService>();
+            FakeTeacherService = new Mock<FakeTeacherService>();
+
             StudentService = new Mock<IStudentService>();
             TeacherService = new Mock<ITeacherService>();
-            TeacherService.Setup(service => service.GetByIdAsync(UserId)).ReturnsAsync(Teacher);
         }
 
         private Teacher CreateTeacherInstance()

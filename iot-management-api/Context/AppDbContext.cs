@@ -1,5 +1,5 @@
 ﻿using iot_management_api.Entities;
-using iot_management_api.Helper;
+using iot_management_api.StaticConfigs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 

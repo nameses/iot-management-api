@@ -54,6 +54,8 @@ namespace iot_management_api.Services
                 .Where(x => subjects.Contains(x.Schedule!.SubjectId!.Value) && x.ScheduleId==scheduleId && x.Date==date)
                 .ToListAsync();
 
+            bookings = RecountDeviceAmount(bookings);
+
             return bookings.IsNullOrEmpty() ? null : bookings;
         }
         public async Task<IEnumerable<Booking>?> GetBookingsForTeacher(int teacherId, DateOnly? dateFrom = null, DateOnly? dateTo = null)
@@ -78,10 +80,15 @@ namespace iot_management_api.Services
 
             var bookings = await query.ToListAsync();
 
+            bookings = RecountDeviceAmount(bookings);
+
             return bookings.IsNullOrEmpty() ? null : bookings;
         }
         public async Task<IEnumerable<Booking>?> GetStudentBookings(DateOnly date, int scheduleId, int studentId)
         {
+            if (date.ToDateTime(new TimeOnly(0))<DateTime.Now)
+                return null;
+
             var bookings = await _context.Bookings
                 .Include(x => x.Schedule)
                 .Include(x => x.Schedule!.Period)
@@ -89,6 +96,8 @@ namespace iot_management_api.Services
                 .Include(x => x.Device!.DeviceInfo)
                 .Where(x => x.StudentId==studentId && x.ScheduleId==scheduleId && x.Date==date)
                 .ToListAsync();
+
+            bookings = RecountDeviceAmount(bookings);
 
             return bookings.IsNullOrEmpty() ? null : bookings;
         }
@@ -106,6 +115,8 @@ namespace iot_management_api.Services
                     && (dateTo==null ? (x.Date>=dateFrom) : (x.Date>=dateFrom&&x.Date<=dateTo)));
 
             var bookings = await query.ToListAsync();
+
+            bookings = RecountDeviceAmount(bookings);
 
             return bookings.IsNullOrEmpty() ? null : bookings;
         }
@@ -141,13 +152,13 @@ namespace iot_management_api.Services
                 .Include(x => x.Device)
                 .Include(x => x.Device!.DeviceInfo)
                 .Include(x => x.Student)
-                .Where(x => x.Status==BookingStatus.Pending && subjects.Contains(x.Schedule!.SubjectId!.Value))
+                .Where(x => EF.Property<DateTime>(x, "Date") >= DateTime.Now && x.Status==BookingStatus.Pending && subjects.Contains(x.Schedule!.SubjectId!.Value))
                 .ToListAsync();
 
             if (bookings.IsNullOrEmpty())
                 return null;
 
-            RecountDeviceAmount(ref bookings);
+            bookings = RecountDeviceAmount(bookings);
 
             return bookings;
         }
@@ -216,30 +227,26 @@ namespace iot_management_api.Services
             return (true, null);
         }
 
-        private void RecountDeviceAmount(ref List<Booking> bookings)
+        private List<Booking> RecountDeviceAmount(List<Booking> bookings)
         {
-            var dateScheduleId = bookings.Select(x => new DateId(x.Date, x.ScheduleId)).ToList();
+            var bookingsRealAmount = new List<Booking>();
 
-            var approvedBookings = _context.Bookings
-                .AsEnumerable()
-                .Where(x => dateScheduleId.Contains(new DateId(x.Date, x.ScheduleId)) && x.Status==BookingStatus.Approved)
-                .ToList();
-
-            //dictionary DeviceId - Count(Booked devices)
-            var deviceBookingCounts = bookings
-                .GroupBy(b => b.DeviceId)
-                .ToDictionary(
-                    group => group.Key ?? 0, // Use 0 as the default key if DeviceId is null
-                    group => group.Count()
-                );
-            //count real amount of devices
+            //count real amount of each devices
             foreach (var b in bookings)
             {
-                if (deviceBookingCounts.TryGetValue(b.Device!.Id, out int bookedCount))
-                    b.Device.Amount -= bookedCount;
+                var amountApprovedSameBookings = _context.Bookings
+                    .Where(x => x.Date == b.Date && x.ScheduleId == b.ScheduleId && x.DeviceId==b.DeviceId && x.Status == BookingStatus.Approved)
+                    .Count();
+
+                var booking = _mapper.Map<Booking>(b);
+                booking.Device!.Amount -= amountApprovedSameBookings;
+
+                if (booking.Device!.Amount<0) booking.Device!.Amount=0;
+
+                bookingsRealAmount.Add(booking);
             }
 
-            bookings = bookings.Where(x => x.Device!.Amount>0).ToList();
+            return bookingsRealAmount;
         }
     }
 }

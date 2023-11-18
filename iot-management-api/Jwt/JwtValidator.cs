@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
-namespace iot_management_api.Helper
+namespace iot_management_api.Jwt
 {
     public class JwtValidator
     {
@@ -14,11 +14,11 @@ namespace iot_management_api.Helper
 
         public JwtValidator(IOptions<JwtConfig> settings, ILogger<JwtValidator> logger)
         {
-            _settings=settings;
-            _logger=logger;
+            _settings = settings;
+            _logger = logger;
         }
 
-        public int? Validate(string token)
+        public virtual int? Validate(string token)
         {
             var secret = _settings.Value.Key;
             var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret!));

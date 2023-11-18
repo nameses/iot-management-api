@@ -1,8 +1,9 @@
 ﻿using iot_management_api.Entities;
 using iot_management_api.Entities.common;
+using iot_management_api.Helper;
 using Microsoft.EntityFrameworkCore;
 
-namespace iot_management_api.Helper
+namespace iot_management_api.StaticConfigs
 {
     public class DataSeeder
     {

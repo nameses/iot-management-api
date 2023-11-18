@@ -1,7 +1,9 @@
 using iot_management_api.Configuration;
 using iot_management_api.Context;
 using iot_management_api.Helper;
+using iot_management_api.Jwt;
 using iot_management_api.Services;
+using iot_management_api.StaticConfigs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.AzureAppServices;

@@ -1,1 +1,3 @@
 .vs/
+coverage.xml
+coveragereport/
