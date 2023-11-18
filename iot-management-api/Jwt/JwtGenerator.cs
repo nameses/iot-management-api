@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace iot_management_api.Helper
+namespace iot_management_api.Jwt
 {
     public class JwtGenerator
     {
@@ -14,7 +14,7 @@ namespace iot_management_api.Helper
 
         public JwtGenerator(IOptions<JwtConfig> conf)
         {
-            _conf=conf;
+            _conf = conf;
         }
         public string GenerateToken(int userId, string email, UserRole userRole)
         {

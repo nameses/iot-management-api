@@ -16,7 +16,7 @@ namespace iot_management_api.Services
         private readonly AppDbContext _context;
         private readonly ILogger<TeacherService> _logger;
         private readonly Encrypter _encrypter;
-
+        protected TeacherService() { }
         public TeacherService(AppDbContext context, ILogger<TeacherService> logger, Encrypter encrypter)
         {
             _context=context;

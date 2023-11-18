@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using iot_management_api.Entities;
 using iot_management_api.Entities.common;
-using iot_management_api.Helper;
+using iot_management_api.Jwt;
 using iot_management_api.Models;
 using iot_management_api.Models.common;
 using iot_management_api.Services;

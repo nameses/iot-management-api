@@ -8,7 +8,7 @@ using static iot_management_api.Controllers.BookingController;
 using static iot_management_api.Controllers.DeviceController;
 using static iot_management_api.Controllers.SubjectController;
 
-namespace iot_management_api.Helper
+namespace iot_management_api.StaticConfigs
 {
     public class AutoMapperProfile : Profile
     {
