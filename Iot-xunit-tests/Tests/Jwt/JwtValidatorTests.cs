@@ -1,6 +1,6 @@
 ﻿using iot_management_api.Configuration;
 using iot_management_api.Entities.common;
-using iot_management_api.Helper;
+using iot_management_api.Jwt;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Iot_xunit_tests.Tests.Helper
+namespace Iot_xunit_tests.Tests.Jwt
 {
     public class JwtValidatorTests
     {

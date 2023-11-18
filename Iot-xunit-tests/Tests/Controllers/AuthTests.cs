@@ -24,8 +24,8 @@ namespace Iot_xunit_tests.Tests.Controllers
         {
             //Arrange
             var controller = new AuthController(
-                _sharedSetup.TeacherService.Object,
-                _sharedSetup.StudentService.Object,
+                _sharedSetup.FakeTeacherService.Object,
+                _sharedSetup.FakeStudentService.Object,
                 _sharedSetup.AuthLogger.Object,
                 _sharedSetup.JwtGenerator,
                 _sharedSetup.Mapper.Object
@@ -100,11 +100,11 @@ namespace Iot_xunit_tests.Tests.Controllers
             };
 
             var mockedTeacherService = _sharedSetup.TeacherService;
-            mockedTeacherService.Setup(service => service.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync((Teacher)null);
+            mockedTeacherService.Setup(service => service.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync((Teacher?)null);
             mockedTeacherService.Setup(service => service.CreateAsync(It.IsAny<Teacher>())).ReturnsAsync(2);
 
             var controller = new AuthController(
-                _sharedSetup.TeacherService.Object,
+                mockedTeacherService.Object,
                 _sharedSetup.StudentService.Object,
                 _sharedSetup.AuthLogger.Object,
                 _sharedSetup.JwtGenerator,
@@ -132,14 +132,10 @@ namespace Iot_xunit_tests.Tests.Controllers
                     Password = "unvalid password"
                 }
             };
-            var student = _sharedSetup.Student;
-
-            var mockedStudentService = _sharedSetup.StudentService;
-            mockedStudentService.Setup(service => service.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(student);
 
             var controller = new AuthController(
-                _sharedSetup.TeacherService.Object,
-                mockedStudentService.Object,
+                _sharedSetup.FakeTeacherService.Object,
+                _sharedSetup.FakeStudentService.Object,
                 _sharedSetup.AuthLogger.Object,
                 _sharedSetup.JwtGenerator,
                 _sharedSetup.Mapper.Object
@@ -165,13 +161,13 @@ namespace Iot_xunit_tests.Tests.Controllers
                 }
             };
 
-            var mockedTeacherService = _sharedSetup.TeacherService;
-            mockedTeacherService.Setup(service => service.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(_sharedSetup.Teacher);
+            //var mockedTeacherService = _sharedSetup.TeacherService;
+            //mockedTeacherService.Setup(service => service.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(_sharedSetup.Teacher);
             //_mockEncrypter.Setup(encrypter => encrypter.Encrypt(It.IsAny<string>())).Returns("hashed_password");
 
             var controller = new AuthController(
-                mockedTeacherService.Object,
-                _sharedSetup.StudentService.Object,
+                _sharedSetup.FakeTeacherService.Object,
+                _sharedSetup.FakeStudentService.Object,
                 _sharedSetup.AuthLogger.Object,
                 _sharedSetup.JwtGenerator,
                 _sharedSetup.Mapper.Object
