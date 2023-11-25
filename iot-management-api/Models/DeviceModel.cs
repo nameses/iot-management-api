@@ -6,7 +6,7 @@ namespace iot_management_api.Models
     {
         public required int Id { get; set; }
         public required int Amount { get; set; }
-        public required DeviceInfoModel DeviceInfo { get; set; }
+        public  DeviceInfoModel DeviceInfo { get; set; }
         [JsonIgnore]
         public RoomModel? Room { get; set; }
 

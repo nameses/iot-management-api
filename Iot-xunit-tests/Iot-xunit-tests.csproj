@@ -30,4 +30,8 @@
     <ProjectReference Include="..\iot-management-api\iot-management-api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DeviceTests\Services\" />
+  </ItemGroup>
+
 </Project>

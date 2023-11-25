@@ -93,7 +93,7 @@ namespace iot_management_api.Controllers
             var entities = await _deviceService.GetByRoomAsync(room);
 
             if (entities==null)
-                return Ok(Array.Empty<string>());
+                return Ok(Enumerable.Empty<DeviceModel>());
 
             return Ok(_mapper.Map<IEnumerable<DeviceModel>>(entities));
         }
