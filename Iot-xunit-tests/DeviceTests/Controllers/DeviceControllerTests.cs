@@ -23,7 +23,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
     public class DeviceControllerTests
     {
         [Fact]
-        public async Task GetAvailable_ReturnsListOfDevices()
+        public async Task GetAvailableReturnsListOfDevices()
         {
             // Arrange
             var deviceServiceMock = new Mock<IDeviceService>();
@@ -59,14 +59,12 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
         }
 
         [Fact]
-        public async Task GetAvailable_ReturnsBadRequestDateExpired()
+        public async Task GetAvailableReturnsBadRequestDateExpired()
         {
             // Arrange
             var deviceServiceMock = new Mock<IDeviceService>();
             var fakeScheculeService = new Mock<FakeScheduleService>();
-            //var scheduleServiceMock = new Mock<IScheduleService>();
-            //scheduleServiceMock.Setup(x => x.CheckDateSchedule(It.IsAny<DateOnly>(), It.IsAny<int>()))
-            //    .ReturnsAsync(true); // Set the desired return value for the mock
+
             var mapperMock = new Mock<IMapper>();
             var loggerMock = new Mock<ILogger<DeviceController>>();
 
@@ -98,7 +96,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
         }
 
         [Fact]
-        public async Task GetById_WhenDeviceExists_ReturnsOkResult()
+        public async Task GetByIdWhenDeviceExistsReturnsOkResult()
         {
             // Arrange
             var deviceServiceMock = new Mock<IDeviceService>();
@@ -126,7 +124,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
         }
 
         [Fact]
-        public async Task GetById_WhenDeviceDoesNotExist_ReturnsNotFoundResult()
+        public async Task GetByIdWhenDeviceDoesNotExistReturnsNotFoundResult()
         {
             // Arrange
             var deviceServiceMock = new Mock<IDeviceService>();
@@ -148,7 +146,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
         }
 
         [Fact]
-        public async Task GetByRoom_ReturnsOkResult_WhenEntitiesExist()
+        public async Task GetByRoomReturnsOkResultWhenEntitiesExist()
         {
             // Arrange
             var roomNumber = 123;
@@ -174,7 +172,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
         }
 
         [Fact]
-        public async Task GetByRoom_ReturnsOkResult_WhenNoEntitiesExist()
+        public async Task GetByRoomReturnsOkResultWhenNoEntitiesExist()
         {
             // Arrange
             var roomNumber = 123;
@@ -196,7 +194,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
 
         // Creates a new device with valid input data
         [Fact]
-        public async Task test_create_device_with_valid_input_data()
+        public async Task TestCreateDeviceWithValidInputData()
         {
             // Arrange
             var deviceReq = new DeviceReq
@@ -229,7 +227,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
 
         // Returns a BadRequest status code when the input data is invalid
         [Fact]
-        public async Task test_create_returns_bad_request_with_invalid_input_data()
+        public async Task TestCreateReturnsBadRequestWithInvalidInputData()
         {
             // Arrange
             var deviceReq = new DeviceReq
@@ -256,7 +254,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
 
         // Returns a BadRequest status code when service give error
         [Fact]
-        public async Task test_create_returns_bad_request_when_date_is_expired()
+        public async Task TestCreateReturnsBadRequestWhenDateIsExpired()
         {
             // Arrange
             var deviceReq = new DeviceReq
@@ -286,7 +284,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
 
         // Returns 200 OK when given a valid id and DeviceUpdateReq object
         [Fact]
-        public async Task test_update_returns_200_ok_with_valid_id_and_device_update_req()
+        public async Task TestUpdateReturns200OkWithValidIdAndDeviceUpdateReq()
         {
             // Arrange
             int id = 1;
@@ -316,7 +314,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
 
         // Returns 404 Not Found when given an invalid id
         [Fact]
-        public async Task test_update_returns_404_not_found_with_invalid_id()
+        public async Task TestUpdateReturns404NotFoundWithInvalidId()
         {
             // Arrange
             int id = 1;
@@ -347,7 +345,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
 
         // Returns 400 Bad Request when id in DeviceUpdateReq object does not match id in route
         [Fact]
-        public async Task test_update_returns_400_bad_request_when_id_not_match_in_device_update_req()
+        public async Task TestUpdateReturns400BadRequestWhenIdNotMatchInDeviceUpdateReq()
         {
             // Arrange
             int id = 1;
@@ -378,7 +376,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
 
         // Deletes a device with a valid id and returns 200 OK.
         [Fact]
-        public async Task delete_valid_id_returns_200_ok()
+        public async Task DeleteValidIdReturns200Ok()
         {
             // Arrange
             int id = 1;
@@ -395,7 +393,7 @@ namespace Iot_xunit_tests.DeviceTests.Controllers
 
         // Returns 404 Not Found when trying to delete a device with an invalid id.
         [Fact]
-        public async Task delete_invalid_id_returns_404_not_found()
+        public async Task DeleteInvalidIdReturns404NotFound()
         {
             // Arrange
             int id = 1;
