@@ -2,6 +2,7 @@
 using iot_management_api.Context;
 using iot_management_api.Entities;
 using iot_management_api.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
